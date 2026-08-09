@@ -1,0 +1,23 @@
+export const ROUTES = {
+  HOME: 'Home',
+  LOGIN: 'Login',
+  CADASTRAR: 'Cadastrar',
+  ESQUECI_SENHA: 'EsqueciSenha',
+  REDEFINIR_SENHA: 'RedefinirSenha',
+  VEICULOS: 'Veiculos',
+  CARRINHO: 'Carrinho',
+  BUSCA: 'Busca',
+  SERVICO: 'Servico',
+  AGENDAMENTO: 'Agendamento',
+  PERFIL: 'Perfil',
+  HISTORICO: 'Historico',
+  GERENTE: {
+    HOME: 'GerenteHome',
+    AGENDAMENTO: 'GerenteAgendamento',
+    DASHBOARD: 'Dashboard',
+    ORDENS_SERVICO: 'OrdensServico',
+    SERVICOS: 'ServicosGerente',
+    CATEGORIAS: 'Categorias',
+    PERFIL: 'PerfilGerente',
+  },
+};
