@@ -1,4 +1,5 @@
 import { Pressable, Text, Image, View } from 'react-native';
+import { Button } from './Button';
 
 type CarrinhoBottomProps = {
 
@@ -22,15 +23,12 @@ export function CarrinhoBottom({
             </Text>
         </View>
 
-        <Pressable
-            onPress={() => {}}
-            className="mt-3 mb-8 rounded-lg py-2 px-4 w-full items-center"
-            style={{ backgroundColor: '#B30000' }}
-        >
-            <Text className="text-base font-semibold text-white">
-                Agendar serviço
-            </Text>
-        </Pressable>
+        <Button
+            texto="Agendar Serviço"
+            onClick={() => {}}
+            className="mt-5 mb-4 bg-red-700 w-full"
+            textClassName="text-white"
+        />
     </View>
   );
 }

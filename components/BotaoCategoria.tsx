@@ -16,8 +16,7 @@ export function BotaoCategoria({
   return (
     <Pressable
         onPress={onClick}
-        className="mb-3 rounded-xl border border-gray-200 h-20 flex-row items-center justify-between active:bg-gray-100"
-        style={{ width: '48.5%' }}
+        className="mb-3 rounded-xl border border-gray-200 h-20 w-[48.5%] flex-row items-center justify-between active:bg-gray-100"
         id={`botao-categoria-${index}`}
     >
         <View className="bg-gray-100 w-1/3 h-full">

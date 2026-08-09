@@ -1,4 +1,5 @@
 import { Pressable, Text, Image, View, ScrollView } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 type CategoriaHeader = {
   id: string | number;
@@ -21,7 +22,7 @@ export function Header({
         {/* Logo */}
         <View className="w-full flex items-center mb-4">
             <Image
-                source={require('../../assets/rick_logo.png')}
+                source={require('../assets/rick_logo.png')}
                 className="w-12 h-12"
                 resizeMode="contain"
             />
@@ -39,9 +40,7 @@ export function Header({
                 </Text>
 
                 <View className="h-full border-l border-gray-300 ml-2 pl-2">
-                    <Text className="px-2 text-base font-semibold text-gray-500">
-                        B
-                    </Text>
+                    <Ionicons name="search" size={24} color="#696b6e"/>
                 </View>
             </Pressable>
 
@@ -49,9 +48,7 @@ export function Header({
                 onPress={() => {}}
                 className="rounded-lg py-2 px-4 w-1/6 items-center justify-center"
             >
-                <Text className="text-base font-semibold text-white">
-                    N
-                </Text>
+                <Ionicons name="notifications-outline" size={24} color="#ffffff" />
             </Pressable>
         </View>
 
