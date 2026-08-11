@@ -40,23 +40,28 @@ export class AuthService {
     async cadastrar(userData) {
         try {
             const response = await apiService.post(`${this.BASE_URL}/`, userData);
-            
-            // Se o backend retorna token após cadastro
+
+            // O endpoint POST /pessoas atual (PessoaController.cadastrar) retorna
+            // apenas o PessoaResponse criado, sem token — o usuário precisa fazer
+            // login em seguida. Este branch fica pronto caso o backend passe a
+            // autenticar automaticamente após o cadastro.
             if (response && response.token) {
                 const user = {
-                    id: response.userId,
+                    id: response.id,
                     email: response.email,
+                    nome: response.nome,
+                    roles: response.roles || [],
                 };
-                
+
                 return {
                     token: response.token,
-                    user: user,
+                    user,
                     expiresIn: this.getTokenExpirationTime(response.token)
                 };
             }
-            
+
             return {
-                user: response || userData
+                user: response
             };
         } catch (error) {
             throw new Error(error.message || 'Erro ao cadastrar');

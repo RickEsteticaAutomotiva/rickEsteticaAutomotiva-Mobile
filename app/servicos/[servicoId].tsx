@@ -5,23 +5,42 @@ import {
   Image,
   Pressable,
   ScrollView,
+  Share,
   Text,
   View,
 } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { servicosService } from '../../services/ServicosService';
 import { Mapa } from '../../components/Mapa';
+import { Alerta } from '../../components/Alerta';
 import { Button } from '../../components/Button';
+import { EstadoCarregamento } from '../../components/EstadoCarregamento';
+import { EstadoErro } from '../../components/EstadoErro';
+import { formatarPreco } from '../../utils';
+import { IMAGEM_PLACEHOLDER } from '../../constants/imagens';
+import { useAuth } from '../../context/AuthContext';
+import { useCarrinho } from '../../context/CarrinhoContext';
+import { useFavoritos } from '../../context/FavoritosContext';
 
 export default function Servico() {
   const { servicoId } = useLocalSearchParams<{
     servicoId: string;
   }>();
 
+  const insets = useSafeAreaInsets();
+  const { isAuthenticated } = useAuth();
+  const { adicionarServico } = useCarrinho();
+  const { isFavorito, alternarFavorito } = useFavoritos();
+
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
   const [servico, setServico] = useState<Record<string, unknown> | null>(null);
+  const [adicionandoCarrinho, setAdicionandoCarrinho] = useState(false);
+  const [mensagemCarrinho, setMensagemCarrinho] = useState<string | null>(null);
+  const [erroCarrinho, setErroCarrinho] = useState<string | null>(null);
+  const [alternandoFavorito, setAlternandoFavorito] = useState(false);
+  const [erroFavorito, setErroFavorito] = useState<string | null>(null);
 
   const carregarServico = useCallback(async () => {
     if (!servicoId) {
@@ -54,26 +73,52 @@ export default function Servico() {
     carregarServico();
   }, [carregarServico]);
 
-  if (loading) {
-    return (
-      <View className="flex-1 items-center justify-center bg-white">
-        <ActivityIndicator size="large" color="#B30000" />
+  async function handleAgendarServico() {
+    if (!isAuthenticated) {
+      router.push('/login');
+      return;
+    }
 
-        <Text className="mt-3 text-base text-gray-700">
-          Carregando serviço...
-        </Text>
-      </View>
-    );
+    await handleAdicionarCarrinho();
+
+    router.push(`/carrinho`);
+  }
+
+  async function handleAdicionarCarrinho() {
+    if (adicionandoCarrinho || !servico?.id) {
+      return;
+    }
+
+    if (!isAuthenticated) {
+      router.push('/login');
+      return;
+    }
+
+    setAdicionandoCarrinho(true);
+    setErroCarrinho(null);
+    setMensagemCarrinho(null);
+
+    try {
+      await adicionarServico(servico.id as string | number);
+      setMensagemCarrinho('Serviço adicionado ao carrinho!');
+    } catch (error) {
+      const mensagem =
+        error instanceof Error ? error.message : 'Não foi possível adicionar ao carrinho.';
+        if (mensagem === 'Esse serviço já está no carrinho deste usuário.') {
+          router.push('/carrinho');
+        }
+      setErroCarrinho(mensagem);
+    } finally {
+      setAdicionandoCarrinho(false);
+    }
+  }
+
+  if (loading) {
+    return <EstadoCarregamento mensagem="Carregando serviço..." />;
   }
 
   if (erro) {
-    return (
-      <View className="flex-1 items-center justify-center bg-white px-5">
-        <Text className="text-base text-red-600">
-          {erro}
-        </Text>
-      </View>
-    );
+    return <EstadoErro mensagem={erro} />;
   }
 
   const nome = String(
@@ -89,21 +134,56 @@ export default function Servico() {
   );
 
   const preco = servico?.preco
-    ? `R$ ${String(servico.preco)}`
+    ? formatarPreco(servico.preco as number | string)
     : null;
 
   const imagem = String(
     servico?.imagem || ''
   );
 
+  const favoritado = servico?.id !== undefined && isFavorito(servico.id as string | number);
+
+  async function handleCompartilhar() {
+    try {
+      await Share.share({
+        title: nome,
+        message: `Confira o serviço "${nome}"${preco ? ` por ${preco}` : ''} na Rick Estética Automotiva!`,
+      });
+    } catch {
+      // Usuário cancelou o compartilhamento ou o sistema não conseguiu abrir o menu; não é um erro a ser exibido.
+    }
+  }
+
+  async function handleFavoritar() {
+    if (alternandoFavorito || !servico?.id) {
+      return;
+    }
+
+    if (!isAuthenticated) {
+      router.push('/login');
+      return;
+    }
+
+    setAlternandoFavorito(true);
+    setErroFavorito(null);
+
+    try {
+      await alternarFavorito(servico.id as string | number);
+    } catch (error) {
+      const mensagem =
+        error instanceof Error ? error.message : 'Não foi possível atualizar seus favoritos.';
+      setErroFavorito(mensagem);
+    } finally {
+      setAlternandoFavorito(false);
+    }
+  }
+
   return (
     <ScrollView className="flex-1 bg-white">
-        <View className="relative h-[350px] w-full overflow-hidden rounded-xl bg-gray-100 mb-4">
+        <View className="relative h-[350px] w-full overflow-hidden bg-gray-100 mb-4">
             <Image
                 source={{
-                uri:
-                    imagem ||
-                    'https://www.setup.gg/wp-content/uploads/2024/06/sacy-featured-image-e1719282126561.jpg',
+                uri: imagem || IMAGEM_PLACEHOLDER,
                 }}
                 className="h-full w-full"
                 resizeMode="cover"
@@ -111,7 +191,8 @@ export default function Servico() {
 
             <Pressable
                 onPress={() => router.back()}
-                className="absolute left-4 top-12 z-50 h-10 w-10 items-center justify-center rounded-full bg-white/80"
+                style={{ top: insets.top + 12 }}
+                className="absolute left-4 z-50 h-10 w-10 items-center justify-center rounded-full bg-white/80"
                 >
                 <Ionicons name="arrow-back" size={24} color="#374151" />
             </Pressable>
@@ -129,24 +210,31 @@ export default function Servico() {
 
           <View className="flex-row items-center gap-2">
             <Pressable
-              onPress={() => {}}
+              onPress={handleCompartilhar}
               className="h-10 w-10 items-center justify-center rounded-full bg-gray-200"
             >
-              <Text className="text-base font-semibold text-gray-700">
-                <Ionicons name="share-social-outline" size={24} color="#374151" />
-              </Text>
+              <Ionicons name="share-social-outline" size={24} color="#374151" />
             </Pressable>
 
             <Pressable
-              onPress={() => {}}
+              onPress={handleFavoritar}
+              disabled={alternandoFavorito}
               className="h-10 w-10 items-center justify-center rounded-full bg-gray-200"
             >
-              <Text className="text-base font-semibold text-gray-700">
-                <Ionicons name="heart-outline" size={24} color="#374151" />
-              </Text>
+              {alternandoFavorito ? (
+                <ActivityIndicator size="small" color="#B30000" />
+              ) : (
+                <Ionicons
+                  name={favoritado ? 'heart' : 'heart-outline'}
+                  size={24}
+                  color={favoritado ? '#B30000' : '#374151'}
+                />
+              )}
             </Pressable>
           </View>
         </View>
+
+        {erroFavorito ? <Alerta tipo="erro" mensagem={erroFavorito} className="mt-3" /> : null}
 
         {/* Preço */}
         <View className="mt-3 w-full rounded-lg bg-gray-100 p-4">
@@ -160,16 +248,23 @@ export default function Servico() {
         </View>
 
         {/* Botões */}
+        {erroCarrinho ? <Alerta tipo="erro" mensagem={erroCarrinho} className="mt-4" /> : null}
+
+        {mensagemCarrinho ? (
+          <Alerta tipo="sucesso" mensagem={mensagemCarrinho} className="mt-4" />
+        ) : null}
+
         <Button
           texto="Adicionar ao Carrinho"
-          onClick={() => {}}
+          onClick={handleAdicionarCarrinho}
+          loading={adicionandoCarrinho}
           className="mt-4 bg-red-700"
           textClassName="text-white"
         />
 
         <Button
           texto="Agendar Serviço"
-          onClick={() => {}}
+          onClick={handleAgendarServico}
           className="mt-4 border border-green-700"
           textClassName="text-green-700"
         />

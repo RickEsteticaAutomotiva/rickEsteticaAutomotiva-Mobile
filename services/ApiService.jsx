@@ -5,6 +5,22 @@ import { jwtDecode } from 'jwt-decode';
 
 export const API_BASE_URL = 'http://192.168.1.9:8080/api/';
 
+function extrairMensagemErro(data, statusPadrao) {
+    if (!data) {
+        return statusPadrao;
+    }
+
+    // Backend responde no formato RFC 7807 (ProblemDetail): a mensagem legível
+    // vem em `detail`. `message` é mantido como fallback por segurança.
+    const mensagemBase = data.detail || data.message || statusPadrao;
+
+    if (Array.isArray(data.campos) && data.campos.length > 0) {
+        return `${mensagemBase}: ${data.campos.join(', ')}`;
+    }
+
+    return mensagemBase;
+}
+
 class ApiService {
     async getStoredToken() {
         try {
@@ -88,31 +104,32 @@ class ApiService {
                         case 401:
                             // Para login/cadastro, retornar erro específico
                             if (originalRequest.url?.includes('/login')) {
-                                throw new Error(data?.message || 'Credenciais inválidas');
+                                throw new Error(extrairMensagemErro(data, 'Credenciais inválidas'));
                             }
-                            
+
                             if (originalRequest.url?.includes('/pessoas') && originalRequest.method === 'post') {
-                                throw new Error(data?.message || 'Erro ao cadastrar usuário');
+                                throw new Error(extrairMensagemErro(data, 'Erro ao cadastrar usuário'));
                             }
-                            
-                            // Para outras requisições, token expirado
+
+                            // Para outras requisições, token expirado ou inválido
                             if (!originalRequest._retry) {
                                 originalRequest._retry = true;
                                 await this.clearAuthStorage();
+                                this.onUnauthorized?.();
                             }
                             throw new Error('Sessão expirada. Faça login novamente.');
-                            
+
                         case 403:
-                            throw new Error('Acesso negado');
-                            
+                            throw new Error(extrairMensagemErro(data, 'Acesso negado'));
+
                         case 404:
-                            throw new Error('Recurso não encontrado');
-                            
+                            throw new Error(extrairMensagemErro(data, 'Recurso não encontrado'));
+
                         case 500:
-                            throw new Error(data?.message || data?.error || 'Erro interno do servidor');
-                            
+                            throw new Error(extrairMensagemErro(data, 'Erro interno do servidor'));
+
                         default:
-                            throw new Error(data?.message || `Erro ${status}`);
+                            throw new Error(extrairMensagemErro(data, `Erro ${status}`));
                     }
                 } else if (error.request) {
                     throw new Error('Erro de conexão com o servidor');
@@ -191,6 +208,13 @@ class ApiService {
 
     async getToken() {
         return await this.getStoredToken();
+    }
+
+    // Permite que a camada de autenticação (AuthContext) seja avisada quando
+    // uma requisição autenticada recebe 401, centralizando o tratamento de
+    // sessão expirada/token inválido em um único lugar.
+    setOnUnauthorized(callback) {
+        this.onUnauthorized = callback;
     }
 }
 

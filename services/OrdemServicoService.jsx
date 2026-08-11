@@ -170,6 +170,12 @@ export class OrdemServicoService {
         }
     }
 
+    /**
+     * @param {number|string} id
+     * @param {number} novoStatus
+     * @param {number|null} [motivo]
+     * @param {string} [observacoes]
+     */
     async atualizarStatus(id, novoStatus, motivo = null, observacoes = '') {
         try {
             const payload = { status: novoStatus };

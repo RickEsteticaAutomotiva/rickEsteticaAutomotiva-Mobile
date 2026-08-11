@@ -1,13 +1,10 @@
 import { Pressable, Text, Image, View, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-
-type CategoriaHeader = {
-  id: string | number;
-  nome: string;
-};
+import { CategoriaChip } from './CategoriaChip';
+import type { Categoria } from '../types';
 
 type HeaderProps = {
-  categorias: CategoriaHeader[];
+  categorias: Categoria[];
   categoriaSelecionadaId: string | number | null;
   onSelecionarCategoria: (categoriaId: string | number | null) => void;
 };
@@ -18,7 +15,7 @@ export function Header({
   onSelecionarCategoria,
 }: HeaderProps) {
   return (
-    <View className="flex direction-col justify-between bg-white p-4 pb-0 rounded-t-xl shadow-md w-full" style={{ backgroundColor: '#B30000' }}>
+    <View className="flex direction-col justify-between bg-white p-4 pb-0 shadow-b-md w-full" style={{ backgroundColor: '#B30000' }}>
         {/* Logo */}
         <View className="w-full flex items-center mb-4">
             <Image
@@ -60,57 +57,20 @@ export function Header({
             className=""
             contentContainerStyle={{ paddingRight: 8 }}
           >
-          <Pressable
+          <CategoriaChip
+            label="Todas"
+            selecionada={categoriaSelecionadaId === null}
             onPress={() => onSelecionarCategoria(null)}
-            className="mr-2 px-4 pt-2"
-          >
-            <Text
-              className="mb-2"
-              style={{ fontWeight: categoriaSelecionadaId === null ? 'bold' : 'normal',
-                color: categoriaSelecionadaId === null ? '#FFFFFF' : '#000000'
-               }}
-            >
-              Todas
-            </Text>
+          />
 
-            <View 
-                className="rounded-t-full h-2 w-full bg-white"
-                style={{
-                display:
-                    categoriaSelecionadaId === null ? 'flex' : 'none',
-                }}
-            >
-            </View>
-          </Pressable>
-
-          {categorias.map((categoria) => {
-            const selecionada = categoriaSelecionadaId === categoria.id;
-
-            return (
-              <Pressable
-                key={String(categoria.id)}
-                onPress={() => onSelecionarCategoria(categoria.id)}
-                className="mr-2 px-4 pt-2"
-              >
-                <Text
-                  className="mb-2"
-                  style={{ 
-                    fontWeight: selecionada ? 'bold' : 'normal',
-                    color: selecionada ? '#FFFFFF' : '#000000' }}
-                >
-                  {categoria.nome}
-                </Text>
-
-                <View 
-                    className="rounded-t-full h-2 w-full bg-white"
-                    style={{
-                    display: selecionada ? 'flex' : 'none',
-                    }}
-                >
-                </View>
-              </Pressable>
-            );
-          })}
+          {categorias.map((categoria) => (
+            <CategoriaChip
+              key={String(categoria.id)}
+              label={categoria.nome}
+              selecionada={categoriaSelecionadaId === categoria.id}
+              onPress={() => onSelecionarCategoria(categoria.id)}
+            />
+          ))}
         </ScrollView>
       )}
     </View>

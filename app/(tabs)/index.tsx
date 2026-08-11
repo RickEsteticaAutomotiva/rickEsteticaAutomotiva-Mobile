@@ -1,112 +1,23 @@
 import { Destaque } from '@/components/Destaque';
+import { EstadoCarregamento } from '@/components/EstadoCarregamento';
 import { Header } from '@/components/Header';
 import { ServicoInicioCard } from "@/components/ServicoInicioCard";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, RefreshControl, ScrollView, Text, View } from "react-native";
+import { RefreshControl, ScrollView, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useLocalSearchParams } from "expo-router";
 import { categoriaService } from "../../services/CategoriaService";
 import { servicosService } from "../../services/ServicosService";
-
-type Categoria = {
-  id: string | number;
-  nome: string;
-};
-
-type Servico = {
-  id: string | number;
-  nome: string;
-  descricao: string;
-  preco: number | string;
-  imagem?: string;
-};
-
-function normalizarCategorias(response: unknown): Categoria[] {
-  const listaChaves = ['data', 'content', 'categorias'];
-
-  if (Array.isArray(response)) {
-    const categorias: Categoria[] = [];
-
-    response.forEach((item, index) => {
-      const categoria = item as Record<string, unknown>;
-      const nome = String(categoria.nome || categoria.name || '').trim();
-      if (!nome) {
-        return;
-      }
-
-      categorias.push({
-        id: (categoria.id as string | number) ?? `categoria-${index}`,
-        nome,
-      });
-    });
-
-    return categorias;
-  }
-
-  if (response && typeof response === 'object') {
-    const payload = response as Record<string, unknown>;
-    for (const chave of listaChaves) {
-      if (Array.isArray(payload[chave])) {
-        return normalizarCategorias(payload[chave]);
-      }
-    }
-  }
-
-  return [];
-}
-
-function normalizarServicos(response: unknown): Servico[] {
-  const listaChaves = ['data', 'content', 'servicos'];
-
-  if (Array.isArray(response)) {
-    const servicos: Servico[] = [];
-
-    response.forEach((item, index) => {
-      const servico = item as Record<string, unknown>;
-      const nome = String(servico.nome || servico.name || '').trim();
-      if (!nome) {
-        return;
-      }
-
-      servicos.push({
-        id: (servico.id as string | number) ?? `servico-${index}`,
-        nome,
-        descricao: String(servico.descricao || servico.description || ''),
-        preco: servico.preco as number | string,
-        imagem: String(servico.imagem || ''),
-      });
-    });
-
-    return servicos;
-  }
-
-  if (response && typeof response === 'object') {
-    const payload = response as Record<string, unknown>;
-    for (const chave of listaChaves) {
-      if (Array.isArray(payload[chave])) {
-        return normalizarServicos(payload[chave]);
-      }
-    }
-  }
-
-  return [];
-}
-
-function formatarPreco(preco?: string | number) {
-  if (typeof preco === 'number') {
-    return preco.toFixed(2).replace('.', ',');
-  }
-
-  if (typeof preco === 'string' && preco.trim()) {
-    return preco;
-  }
-
-  return null;
-}
+import { normalizarCategorias, normalizarServicos } from "../../utils/normalizacao";
+import type { Categoria, Servico } from "../../types";
 
 export default function Home() {
+  const { categoriaId: categoriaIdParam } = useLocalSearchParams<{ categoriaId?: string }>();
+
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [categoriaSelecionadaId, setCategoriaSelecionadaId] = useState<
     string | number | null
-  >(null);
+  >(categoriaIdParam ?? null);
   const [servicos, setServicos] = useState<Servico[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -119,7 +30,9 @@ export default function Home() {
 
   const carregarCategorias = useCallback(async () => {
     const response = await categoriaService.buscarTodas();
-    setCategorias(normalizarCategorias(response));
+    const lista = normalizarCategorias(response);
+    setCategorias(lista);
+    return lista;
   }, []);
 
   const carregarServicos = useCallback(async (categoriaNome?: string) => {
@@ -134,8 +47,13 @@ export default function Home() {
     setErro(null);
 
     try {
-      await carregarCategorias();
-      await carregarServicos();
+      const categoriasCarregadas = await carregarCategorias();
+      const categoriaInicial = categoriaIdParam
+        ? categoriasCarregadas.find((item) => String(item.id) === categoriaIdParam)
+        : undefined;
+
+      setCategoriaSelecionadaId(categoriaInicial?.id ?? null);
+      await carregarServicos(categoriaInicial?.nome);
     } catch (error) {
       const mensagem =
         error instanceof Error ? error.message : 'Não foi possível carregar a home.';
@@ -145,7 +63,7 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  }, [carregarCategorias, carregarServicos]);
+  }, [carregarCategorias, carregarServicos, categoriaIdParam]);
 
   useEffect(() => {
     carregarDadosIniciais();
@@ -179,22 +97,17 @@ export default function Home() {
   }, [carregarDadosIniciais]);
 
   if (loading) {
-    return (
-      <View className="flex-1 items-center justify-center bg-white">
-        <ActivityIndicator size="large" color="#B30000" />
-        <Text className="mt-3 text-base text-gray-700">Carregando home...</Text>
-      </View>
-    );
+    return <EstadoCarregamento mensagem="Carregando home..." />;
   }
 
   return (
-    <View className="flex-1 bg-gray-200">
+    <SafeAreaView edges={['top']} className="flex-1" style={{ backgroundColor: '#B30000' }}>
       <Header
         categorias={categorias}
         categoriaSelecionadaId={categoriaSelecionadaId}
         onSelecionarCategoria={selecionarCategoria}
       />
-      <View className="flex-1 w-full">
+      <View className="flex-1 w-full bg-gray-200">
         {erro ? <Text className="mb-4 text-sm text-red-600">{erro}</Text> : null}
 
         <ScrollView
@@ -234,6 +147,6 @@ export default function Home() {
           </View>
         </ScrollView>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }

@@ -1,6 +1,7 @@
 import { Image, Pressable, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { formatarPreco } from '../utils';
+import { IMAGEM_PLACEHOLDER } from '../constants/imagens';
 
 type ServicoProps = {
   servicoId: string | number;
@@ -34,7 +35,7 @@ export function ServicoInicioCard({
     >
       <View className="mb-2 h-[150px] w-full overflow-hidden rounded-lg bg-gray-100">
         <Image
-          source={require('../assets/servicos/Cristalizacao_de_Pintura.jpg')}
+          source={{ uri: imagem || IMAGEM_PLACEHOLDER }}
           className="h-full w-full"
           resizeMode="cover"
         />

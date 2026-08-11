@@ -1,13 +1,12 @@
-import { Pressable, Text, Image, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { Button } from './Button';
+import { router } from 'expo-router';
+import { useCarrinho } from '../context/CarrinhoContext';
+import { formatarPreco } from '../utils';
 
-type CarrinhoBottomProps = {
+export function CarrinhoBottom() {
+  const { quantidadeItens, total } = useCarrinho();
 
-};
-
-export function CarrinhoBottom({
-  
-}: CarrinhoBottomProps) {
   return (
     <View className="flex-row flex-wrap justify-between bg-white p-4 rounded-t-xl shadow-md w-full">
         <Text className="text-xl font-semibold text-gray-900 mb-3">
@@ -19,15 +18,18 @@ export function CarrinhoBottom({
                 Valor mínimo:
             </Text>
             <Text className="text-base font-semibold text-gray-900">
-                R$ 0,00
+                {formatarPreco(total)}
             </Text>
         </View>
 
         <Button
             texto="Agendar Serviço"
-            onClick={() => {}}
+            onClick={() => {router.push({
+                      pathname: '/veiculo'
+                      })}}
             className="mt-5 mb-4 bg-red-700 w-full"
             textClassName="text-white"
+            disabled={quantidadeItens === 0}
         />
     </View>
   );
