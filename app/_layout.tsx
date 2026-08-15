@@ -7,6 +7,7 @@ import '../global.css';
 import { AuthProvider, useAuth } from '../context/AuthContext';
 import { CarrinhoProvider } from '../context/CarrinhoContext';
 import { FavoritosProvider } from '../context/FavoritosContext';
+import { CarrinhoAnimacaoOverlay } from '../components/CarrinhoAnimacaoOverlay';
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -15,7 +16,16 @@ export const unstable_settings = {
 // Navegação (Home, Categoria, detalhe de serviço) fica liberada sem login;
 // apenas telas cujo conteúdo depende do usuário logado exigem autenticação.
 const ROTAS_PUBLICAS = ['/login', '/cadastro'];
-const ROTAS_PROTEGIDAS = ['/carrinho', '/configuracoes', '/veiculo', '/agendamento', '/historico'];
+const ROTAS_PROTEGIDAS = [
+  '/carrinho',
+  '/configuracoes',
+  '/veiculo',
+  '/veiculos',
+  '/agendamento',
+  '/historico',
+  '/editar-perfil',
+  '/favoritos',
+];
 
 function useProtecaoDeRotas(isAuthenticated: boolean, loading: boolean) {
   const pathname = usePathname();
@@ -142,7 +152,59 @@ function RootLayoutNav() {
           },
         }}
         />
+        <Stack.Screen
+          name="veiculos"
+          options={{
+          title: 'Meus veículos',
+          headerShown: true,
+          headerTitle: 'Meus veículos',
+          headerTitleAlign: 'center',
+          headerStyle: {
+            backgroundColor: '#B30000',
+          },
+          headerTitleStyle: {
+            color: '#FFFFFF',
+            fontSize: 18,
+            fontWeight: 'bold',
+          },
+        }}
+        />
+        <Stack.Screen
+          name="favoritos"
+          options={{
+          title: 'Serviços favoritos',
+          headerShown: true,
+          headerTitle: 'Serviços favoritos',
+          headerTitleAlign: 'center',
+          headerStyle: {
+            backgroundColor: '#B30000',
+          },
+          headerTitleStyle: {
+            color: '#FFFFFF',
+            fontSize: 18,
+            fontWeight: 'bold',
+          },
+        }}
+        />
+        <Stack.Screen
+          name="editar-perfil"
+          options={{
+          title: 'Editar perfil',
+          headerShown: true,
+          headerTitle: 'Editar perfil',
+          headerTitleAlign: 'center',
+          headerStyle: {
+            backgroundColor: '#B30000',
+          },
+          headerTitleStyle: {
+            color: '#FFFFFF',
+            fontSize: 18,
+            fontWeight: 'bold',
+          },
+        }}
+        />
       </Stack>
+      <CarrinhoAnimacaoOverlay />
       <StatusBar style="auto" />
     </>
   );

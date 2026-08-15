@@ -117,7 +117,7 @@ export default function Home() {
         >
           <Destaque />
 
-          <View className="w-full bg-white px-5 mt-5 rounded-tl-3xl rounded-tr-3xl pt-5">
+          <View className="w-full bg-white px-5 mt-5 rounded-tl-3xl rounded-tr-3xl pt-5 pb-5">
             <Text className="text-2xl font-bold text-gray-900">
               {categoriaSelecionada ? categoriaSelecionada.nome : 'Todos os serviços'}
             </Text>

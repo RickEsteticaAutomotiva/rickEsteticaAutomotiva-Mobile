@@ -71,24 +71,8 @@ export default function Carrinho() {
 
   return (
     <View className="flex-1" style={{ backgroundColor: '#f7f7f7' }}>
-      <ScrollView className="flex-1 px-1 mt-5" contentContainerStyle={{ paddingBottom: 140 }}>
-        <View className="items-center justify-center bg-white p-5 rounded-lg shadow-md border border-gray-200">
-
-          <View className="w-full border-b border-gray-200 mb-4">
-            <Text className="text-xl font-bold text-gray-900 mb-2">
-              Carrinho de serviços
-            </Text>
-
-            <View className="flex-row justify-between w-full ">
-              <Text className="text-base text-gray-600 mb-2">
-                Serviço
-              </Text>
-
-              <Text className="text-base text-gray-600 mb-2">
-                A partir de
-              </Text>
-            </View>
-          </View>
+      <ScrollView className="flex-1 px-3 mt-5" contentContainerStyle={{ paddingBottom: 140 }}>
+        <View className="items-center justify-center p-2">
 
           {erroRemocao ? <Alerta mensagem={erroRemocao} className="mb-3 w-full" /> : null}
 
@@ -98,7 +82,7 @@ export default function Carrinho() {
             return (
               <View
                 key={String(item.idCarrinho)}
-                className="flex-row justify-between w-full mb-2 border-b border-gray-200 pb-2"
+                className="flex-row justify-between w-full mb-3 p-3 rounded-lg bg-white shadow-md"
               >
                 <Pressable
                   id={`servico-card-${item.idServico}`}
@@ -111,7 +95,7 @@ export default function Carrinho() {
                     });
                   }}
                 >
-                  <View className="items-center bg-gray-100 rounded-lg h-[60px] w-[60px]">
+                  <View className="items-center bg-gray-100 rounded-lg h-[80px] w-[80px]">
                     <Image
                       source={{ uri: item.imagem || IMAGEM_PLACEHOLDER }}
                       className="w-full h-full rounded-lg"
@@ -138,12 +122,6 @@ export default function Carrinho() {
                       </Text>
                     </Pressable>
 
-                    <Text className="text-base text-gray-900">
-                      {formatarPreco(item.preco)}
-                    </Text>
-                  </View>
-
-                  <View className="flex-row items-center mt-2">
                     <Pressable
                       className="mr-2 flex-row items-start"
                       disabled={removendo}
@@ -153,11 +131,16 @@ export default function Carrinho() {
                         <ActivityIndicator size="small" color="#374151" />
                       ) : (
                         <View className="flex-row items-center">
-                          <Ionicons name="trash-outline" size={20} color="#B30000"/>
-                          <Text className="text-red-900 ml-2">Remover do carrinho</Text>
+                          <Ionicons name="trash-outline" size={18} color="#B30000"/>
                         </View>
                       )}
                     </Pressable>
+                  </View>
+
+                  <View className="flex-row items-center mt-2">
+                    <Text className="text-base text-gray-900">
+                      {formatarPreco(item.preco)}
+                    </Text>
                   </View>
                 </View>
               </View>

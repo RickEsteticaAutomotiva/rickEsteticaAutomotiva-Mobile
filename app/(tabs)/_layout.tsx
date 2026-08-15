@@ -1,8 +1,30 @@
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Tabs } from 'expo-router';
-import React from 'react';
+import React, { useRef } from 'react';
+import { View } from 'react-native';
+import { useCarrinho } from '../../context/CarrinhoContext';
+
+function CarrinhoTabIcon({ color }: { color: string }) {
+  const { registrarPosicaoCarrinho } = useCarrinho();
+  const ref = useRef<View>(null);
+
+  return (
+    <View
+      ref={ref}
+      onLayout={() => {
+        ref.current?.measureInWindow((x, y, width, height) => {
+          registrarPosicaoCarrinho({ x: x + width / 2, y: y + height / 2 });
+        });
+      }}
+    >
+      <IconSymbol size={28} name="cart.fill" color={color} />
+    </View>
+  );
+}
 
 export default function TabLayout() {
+  const { quantidadeItens } = useCarrinho();
+
   return (
     <Tabs
       screenOptions={{
@@ -53,6 +75,30 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
+        name="categoria/[categoriaId]"
+        options={{
+          href: null,
+          headerShown: false,
+        }}
+      />
+
+      <Tabs.Screen
+        name="pesquisa"
+        options={{
+          href: null,
+          headerShown: false,
+        }}
+      />
+
+      <Tabs.Screen
+        name="pesquisa/resultados"
+        options={{
+          href: null,
+          headerShown: false,
+        }}
+      />
+
+      <Tabs.Screen
         name="carrinho"
         options={{
           title: 'Carrinho',
@@ -67,13 +113,12 @@ export default function TabLayout() {
             fontSize: 18,
             fontWeight: 'bold',
           },
-          tabBarIcon: ({ color }) => (
-            <IconSymbol
-              size={28}
-              name="cart.fill"
-              color={color}
-            />
-          ),
+          tabBarIcon: ({ color }) => <CarrinhoTabIcon color={color} />,
+          tabBarBadge: quantidadeItens > 0 ? quantidadeItens : undefined,
+          tabBarBadgeStyle: {
+            backgroundColor: '#B30000',
+            color: '#FFFFFF',
+          },
         }}
       />
 

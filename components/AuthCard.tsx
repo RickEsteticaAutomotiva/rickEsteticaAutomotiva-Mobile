@@ -24,13 +24,13 @@ export function AuthCard({
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: '#f7f7f7' }}>
       <ScrollView
         className="flex-1"
-        style={{ backgroundColor: '#f7f7f7' }}
+        style={{ backgroundColor: '#FFFFFF' }}
         keyboardShouldPersistTaps="handled"
       >
         <HeaderLogo />
 
-        <View className="flex items-center justify-center border border-gray-200 rounded-lg shadow-md bg-white m-5">
-          <View className="w-full h-32 bg-gray-200 rounded-t-lg mb-5 justify-center items-center border-b border-gray-200">
+        <View className="flex items-center justify-center bg-white">
+          <View className="w-full h-32 rounded-t-lg mb-5 justify-center items-center border-b border-gray-200">
             <Text className="text-2xl font-bold">{titulo}</Text>
             <Text className="text-base text-gray-600 mt-2">{subtitulo}</Text>
           </View>

@@ -42,6 +42,25 @@ export type Favorito = {
   idServico: string | number;
 };
 
+export type FavoritoServico = {
+  idFavorito: string | number;
+  idServico: string | number;
+  nome: string;
+  descricao: string;
+  preco: number | string;
+  imagem?: string;
+};
+
+export type Perfil = {
+  id: string | number;
+  nome?: string;
+  email?: string;
+  telefone?: string;
+  cpf?: string;
+  dataNascimento?: string;
+  roles?: string[];
+};
+
 export type ItemOrdemServico = {
   id: string | number;
   nome: string;

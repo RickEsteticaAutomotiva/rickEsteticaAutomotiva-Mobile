@@ -52,7 +52,7 @@ export default function CategoriaScreen() {
   }
 
   return (
-      <View className="flex-1 bg-white p-5">
+      <View className="flex-1 bg-white p-3">
         {erro ? <Text className="mt-4 text-sm text-red-600">{erro}</Text> : null}
   
         <FlatList
@@ -72,7 +72,7 @@ export default function CategoriaScreen() {
               index={index}
               onClick={() => {
                 router.push({
-                  pathname: '/',
+                  pathname: '/categoria/[categoriaId]',
                   params: { categoriaId: String(item.id) },
                 });
               }}

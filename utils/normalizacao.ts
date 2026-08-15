@@ -2,9 +2,11 @@ import { StatusAgendamento } from './enum/statusAgendamento';
 import type {
   Categoria,
   Favorito,
+  FavoritoServico,
   ItemCarrinho,
   ItemOrdemServico,
   OrdemServico,
+  Perfil,
   Servico,
   Veiculo,
 } from '../types';
@@ -103,6 +105,63 @@ export function normalizarCarrinho(response: unknown): ItemCarrinho[] {
   });
 
   return itens;
+}
+
+export function normalizarFavoritosServicos(response: unknown): FavoritoServico[] {
+  const itens: FavoritoServico[] = [];
+
+  extrairLista(response).forEach((item) => {
+    const registro = item as Record<string, unknown>;
+    const servico = registro.servico as Record<string, unknown> | undefined;
+
+    const idFavorito = (registro.id ?? registro.idFavorito) as string | number | undefined;
+    const idServico = (registro.idServico ?? registro.servicoId ?? servico?.id) as
+      | string
+      | number
+      | undefined;
+
+    if (idFavorito === undefined || idFavorito === null || idServico === undefined || idServico === null) {
+      return;
+    }
+
+    const nome = String(registro.nome || servico?.nome || servico?.name || '').trim();
+    if (!nome) {
+      return;
+    }
+
+    itens.push({
+      idFavorito,
+      idServico,
+      nome,
+      descricao: String(registro.descricao || servico?.descricao || ''),
+      preco: (registro.preco ?? servico?.preco) as number | string,
+      imagem: String(registro.imagem || servico?.imagem || ''),
+    });
+  });
+
+  return itens;
+}
+
+export function normalizarPerfil(response: unknown): Perfil | null {
+  if (!response || typeof response !== 'object') {
+    return null;
+  }
+
+  const dados = response as Record<string, unknown>;
+
+  if (dados.id === undefined || dados.id === null) {
+    return null;
+  }
+
+  return {
+    id: dados.id as string | number,
+    nome: dados.nome ? String(dados.nome) : undefined,
+    email: dados.email ? String(dados.email) : undefined,
+    telefone: dados.telefone ? String(dados.telefone) : undefined,
+    cpf: dados.cpf ? String(dados.cpf) : undefined,
+    dataNascimento: dados.dataNascimento ? String(dados.dataNascimento) : undefined,
+    roles: Array.isArray(dados.roles) ? dados.roles.map(String) : undefined,
+  };
 }
 
 export function normalizarVeiculo(item: unknown): Veiculo | null {

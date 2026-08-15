@@ -1,51 +1,21 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Alerta } from '../../components/Alerta';
+import { ConfiguracaoItem } from '../../components/ConfiguracaoItem';
 import { EstadoCarregamento } from '../../components/EstadoCarregamento';
 import { useAuth } from '../../context/AuthContext';
 import { usuarioService } from '../../services/UsuarioService';
-import { formatarDataSimples } from '../../utils';
-import { router } from 'expo-router';
+import { normalizarPerfil } from '../../utils/normalizacao';
+import type { Perfil } from '../../types';
+import { router, useFocusEffect } from 'expo-router';
 
 const ROTULOS_ROLE: Record<string, string> = {
     ROLE_ADMIN: 'Administrador',
     ROLE_GERENTE: 'Gerente',
     ROLE_CLIENTE: 'Cliente',
 };
-
-type Perfil = {
-    id: number | string;
-    nome?: string;
-    email?: string;
-    telefone?: string;
-    cpf?: string;
-    dataNascimento?: string;
-    roles?: string[];
-};
-
-function normalizarPerfil(response: unknown): Perfil | null {
-    if (!response || typeof response !== 'object') {
-        return null;
-    }
-
-    const dados = response as Record<string, unknown>;
-
-    if (dados.id === undefined || dados.id === null) {
-        return null;
-    }
-
-    return {
-        id: dados.id as number | string,
-        nome: dados.nome ? String(dados.nome) : undefined,
-        email: dados.email ? String(dados.email) : undefined,
-        telefone: dados.telefone ? String(dados.telefone) : undefined,
-        cpf: dados.cpf ? String(dados.cpf) : undefined,
-        dataNascimento: dados.dataNascimento ? String(dados.dataNascimento) : undefined,
-        roles: Array.isArray(dados.roles) ? dados.roles.map(String) : undefined,
-    };
-}
 
 export default function Configuracoes() {
     const { user, logout } = useAuth();
@@ -76,9 +46,13 @@ export default function Configuracoes() {
         }
     }, [user?.id]);
 
-    useEffect(() => {
-        carregarPerfil();
-    }, [carregarPerfil]);
+    // useFocusEffect (em vez de useEffect simples) garante que, ao voltar de
+    // Editar perfil, os dados exibidos aqui reflitam a alteração salva.
+    useFocusEffect(
+        useCallback(() => {
+            carregarPerfil();
+        }, [carregarPerfil])
+    );
 
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
@@ -106,53 +80,57 @@ export default function Configuracoes() {
     const roles = (perfil?.roles ?? []).map((role) => ROTULOS_ROLE[role] ?? role);
 
     return (
-        <SafeAreaView edges={['top']} className="flex-1 bg-gray-100">
+        <SafeAreaView edges={['top']} className="flex-1" style={{ backgroundColor: '#B30000' }}>
         <ScrollView
             className="flex-1 bg-gray-100"
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         >
-            <View className="items-center bg-white pb-6 pt-8">
+            <View className="items-center pb-6 pt-8" style={{ backgroundColor: '#B30000' }}>
                 <View className="h-20 w-20 items-center justify-center rounded-full bg-gray-200">
                     <Ionicons name="person" size={40} color="#696b6e" />
                 </View>
 
-                <Text className="mt-3 text-xl font-bold text-gray-900">
+                <Text className="mt-3 text-xl font-bold text-white">
                     {perfil?.nome || 'Usuário'}
                 </Text>
 
                 {roles.length > 0 ? (
-                    <Text className="mt-1 text-sm text-gray-500">{roles.join(', ')}</Text>
+                    <Text className="mt-1 text-sm text-gray-100">{roles.join(', ')}</Text>
                 ) : null}
             </View>
 
-            <Pressable
-                onPress={() => {
-                    router.push({
-                        pathname: '/historico'
-                    });
-                }}
-                className="mt-5 flex-row items-center justify-between rounded-lg bg-white px-4 py-3 shadow-sm border border-gray-200"
-            >
-                <View className="flex-row items-center">
-                    <Ionicons name="time-outline" size={20} color="#696b6e" />
-                    <Text className="ml-3 text-base text-gray-900">Histórico de agendamentos</Text>
-                </View>
-
-                <Ionicons name="chevron-forward" size={20} color="#696b6e" />
-            </Pressable>
-
-            <View className="m-5">
+            <View className="my-4 mx-2">
                 {erro ? <Alerta mensagem={erro} /> : null}
 
-                <View className="rounded-xl border border-gray-200 bg-white">
-                    <InfoLinha icone="mail-outline" label="E-mail" valor={perfil?.email} />
-                    <InfoLinha icone="call-outline" label="Telefone" valor={perfil?.telefone} />
-                    <InfoLinha icone="card-outline" label="CPF" valor={perfil?.cpf} />
-                    <InfoLinha
-                        icone="calendar-outline"
-                        label="Data de nascimento"
-                        valor={perfil?.dataNascimento ? formatarDataSimples(perfil.dataNascimento) : undefined}
-                        ultimo
+                <View className="bg-white rounded-lg p-2 shadow-md mb-4">
+                    <ConfiguracaoItem
+                        icone="person-outline"
+                        titulo="Editar perfil"
+                        subtitulo="Altere seus dados pessoais"
+                        onPress={() => router.push('/editar-perfil')}
+                    />
+
+                    <ConfiguracaoItem
+                        icone="car-outline"
+                        titulo="Meus veículos"
+                        subtitulo="Gerencie seus veículos"
+                        onPress={() => router.push('/veiculos')}
+                    />
+                </View>
+
+                <View className="bg-white rounded-lg p-2 shadow-md">
+                    <ConfiguracaoItem
+                        icone="heart-outline"
+                        titulo="Serviços favoritos"
+                        subtitulo="Veja seus serviços salvos"
+                        onPress={() => router.push('/favoritos')}
+                    />
+
+                    <ConfiguracaoItem
+                        icone="time-outline"
+                        titulo="Histórico de agendamentos"
+                        subtitulo="Veja seus agendamentos passados"
+                        onPress={() => router.push('/historico')}
                     />
                 </View>
 
@@ -173,27 +151,5 @@ export default function Configuracoes() {
             </View>
         </ScrollView>
         </SafeAreaView>
-    );
-}
-
-type InfoLinhaProps = {
-    icone: keyof typeof Ionicons.glyphMap;
-    label: string;
-    valor?: string;
-    ultimo?: boolean;
-};
-
-function InfoLinha({ icone, label, valor, ultimo = false }: InfoLinhaProps) {
-    return (
-        <View
-            className={`flex-row items-center px-4 py-4 ${ultimo ? '' : 'border-b border-gray-100'}`}
-        >
-            <Ionicons name={icone} size={20} color="#696b6e" />
-
-            <View className="ml-3 flex-1">
-                <Text className="text-xs text-gray-500">{label}</Text>
-                <Text className="text-base text-gray-900">{valor || 'Não informado'}</Text>
-            </View>
-        </View>
     );
 }

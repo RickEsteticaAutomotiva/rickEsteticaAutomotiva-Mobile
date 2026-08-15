@@ -9,12 +9,8 @@ export function CarrinhoBottom() {
 
   return (
     <View className="flex-row flex-wrap justify-between bg-white p-4 rounded-t-xl shadow-md w-full">
-        <Text className="text-xl font-semibold text-gray-900 mb-3">
-            Resumo do pedido
-        </Text>
-
-        <View className="flex-row justify-between w-full border-t border-gray-200 pt-3">
-            <Text className="text-base font-semibold text-gray-900">
+        <View className="flex-row justify-between w-full pt-3">
+            <Text className="text-base font-semibold text-gray-700">
                 Valor mínimo:
             </Text>
             <Text className="text-base font-semibold text-gray-900">

@@ -2,7 +2,7 @@ import { Pressable, Text, Image, View } from 'react-native';
 
 export function HeaderLogo() {
     return (
-        <View className="flex direction-col justify-between bg-white p-4 pb-0 rounded-t-xl shadow-md w-full" style={{ backgroundColor: '#B30000' }}>
+        <View className="flex direction-col justify-center bg-white p-4 pb-0 shadow-md w-full h-[100px]" style={{ backgroundColor: '#B30000' }}>
             {/* Logo */}
             <View className="w-full flex items-center mb-4">
                 <Image

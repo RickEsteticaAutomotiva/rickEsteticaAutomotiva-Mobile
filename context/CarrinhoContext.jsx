@@ -1,4 +1,5 @@
-import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { Dimensions } from 'react-native';
 import { carrinhoService } from '../services/CarrinhoService';
 import { normalizarCarrinho } from '../utils/normalizacao';
 import { useAuth } from './AuthContext';
@@ -12,6 +13,8 @@ import { useAuth } from './AuthContext';
  *   preco: number|string,
  *   imagem?: string,
  * }} ItemCarrinho
+ * @typedef {{ x: number, y: number }} Posicao
+ * @typedef {{ id: number, origem: Posicao, destino: Posicao }} AnimacaoCarrinho
  * @typedef {{
  *   itens: ItemCarrinho[],
  *   loading: boolean,
@@ -22,6 +25,10 @@ import { useAuth } from './AuthContext';
  *   carregarCarrinho: () => Promise<void>,
  *   adicionarServico: (idServico: number|string) => Promise<void>,
  *   removerItem: (idCarrinho: number|string) => Promise<void>,
+ *   animacoes: AnimacaoCarrinho[],
+ *   registrarPosicaoCarrinho: (posicao: Posicao) => void,
+ *   dispararAnimacaoCarrinho: (origem: Posicao) => void,
+ *   removerAnimacao: (id: number) => void,
  * }} CarrinhoContextValue
  */
 
@@ -83,6 +90,28 @@ export function CarrinhoProvider({ children }) {
 
     const subtotal = itens.reduce((soma, item) => soma + (Number(item.preco) || 0), 0);
 
+    // Guardamos a posição do ícone do carrinho na tab bar em um ref (não em
+    // state) porque ela só é usada de forma imperativa ao disparar uma
+    // animação — não precisa provocar re-render quando é atualizada.
+    const posicaoCarrinhoRef = useRef(/** @type {Posicao | null} */ (null));
+    const [animacoes, setAnimacoes] = useState(/** @type {AnimacaoCarrinho[]} */ ([]));
+
+    const registrarPosicaoCarrinho = useCallback((posicao) => {
+        posicaoCarrinhoRef.current = posicao;
+    }, []);
+
+    const dispararAnimacaoCarrinho = useCallback((origem) => {
+        const { width, height } = Dimensions.get('window');
+        const destino = posicaoCarrinhoRef.current || { x: width - 40, y: height - 40 };
+        const id = Date.now() + Math.random();
+
+        setAnimacoes((atual) => [...atual, { id, origem, destino }]);
+    }, []);
+
+    const removerAnimacao = useCallback((id) => {
+        setAnimacoes((atual) => atual.filter((item) => item.id !== id));
+    }, []);
+
     return (
         <CarrinhoContext.Provider
             value={{
@@ -95,6 +124,10 @@ export function CarrinhoProvider({ children }) {
                 carregarCarrinho,
                 adicionarServico,
                 removerItem,
+                animacoes,
+                registrarPosicaoCarrinho,
+                dispararAnimacaoCarrinho,
+                removerAnimacao,
             }}
         >
             {children}

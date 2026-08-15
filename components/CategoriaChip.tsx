@@ -13,7 +13,7 @@ export function CategoriaChip({ label, selecionada, onPress }: CategoriaChipProp
         className="mb-2"
         style={{
           fontWeight: selecionada ? 'bold' : 'normal',
-          color: selecionada ? '#FFFFFF' : '#000000',
+          color: '#FFFFFF',
         }}
       >
         {label}
