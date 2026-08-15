@@ -5,18 +5,44 @@ import {
   Text,
   View,
 } from 'react-native';
+import type { ImageSourcePropType } from 'react-native';
 import { router } from 'expo-router';
 import { categoriaService } from '../../services/CategoriaService';
+import { servicosService } from '../../services/ServicosService';
 import { BotaoCategoria } from '../../components/BotaoCategoria';
 import { EstadoCarregamento } from '../../components/EstadoCarregamento';
-import { normalizarCategorias } from '../../utils/normalizacao';
+import { normalizarCategorias, normalizarServicos } from '../../utils/normalizacao';
+import { getImagemServico } from '../../constants/imagensServicos';
 import type { Categoria } from '../../types';
 
 export default function CategoriaScreen() {
   const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [imagensCategorias, setImagensCategorias] = useState<
+    Record<string, ImageSourcePropType>
+  >({});
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
+
+  const carregarImagensCategorias = useCallback(async (categoriasParaCarregar: Categoria[]) => {
+    const entradas = await Promise.all(
+      categoriasParaCarregar.map(async (categoria) => {
+        try {
+          const servicosResponse = await servicosService.buscarPorCategoria(categoria.nome, {
+            tamanho: 1,
+          });
+          const [servico] = normalizarServicos(servicosResponse);
+          return [String(categoria.id), getImagemServico(servico?.nome)] as const;
+        } catch {
+          return [String(categoria.id), null] as const;
+        }
+      })
+    );
+
+    setImagensCategorias(
+      Object.fromEntries(entradas.filter((entrada): entrada is [string, ImageSourcePropType] => entrada[1] !== null))
+    );
+  }, []);
 
   const carregarCategorias = useCallback(async () => {
     setErro(null);
@@ -25,6 +51,7 @@ export default function CategoriaScreen() {
       const response = await categoriaService.buscarTodas();
       const categoriasNormalizadas = normalizarCategorias(response);
       setCategorias(categoriasNormalizadas);
+      carregarImagensCategorias(categoriasNormalizadas);
     } catch (error) {
       const mensagem =
         error instanceof Error
@@ -35,7 +62,7 @@ export default function CategoriaScreen() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [carregarImagensCategorias]);
 
   useEffect(() => {
     carregarCategorias();
@@ -68,7 +95,7 @@ export default function CategoriaScreen() {
           renderItem={({ item, index }) => (
             <BotaoCategoria
               categoria={item.nome}
-              imagem={item.imagem}
+              imagem={imagensCategorias[String(item.id)]}
               index={index}
               onClick={() => {
                 router.push({

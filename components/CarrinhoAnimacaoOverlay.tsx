@@ -1,6 +1,6 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
+import type { ImageSourcePropType } from 'react-native';
 import Animated, {
   Easing,
   interpolate,
@@ -10,11 +10,13 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { useCarrinho } from '../context/CarrinhoContext';
+import { IMAGEM_PADRAO } from '../constants/imagensServicos';
 
 const DURACAO_MS = 650;
+const TAMANHO_IMAGEM = 40;
 
 type Posicao = { x: number; y: number };
-type Animacao = { id: number; origem: Posicao; destino: Posicao };
+type Animacao = { id: number; origem: Posicao; destino: Posicao; imagem?: ImageSourcePropType };
 
 function ItemVoando({ animacao, onFinalizar }: { animacao: Animacao; onFinalizar: () => void }) {
   const progresso = useSharedValue(0);
@@ -48,8 +50,8 @@ function ItemVoando({ animacao, onFinalizar }: { animacao: Animacao; onFinalizar
 
     return {
       position: 'absolute',
-      left: x - 14,
-      top: y - 14,
+      left: x - TAMANHO_IMAGEM / 2,
+      top: y - TAMANHO_IMAGEM / 2,
       opacity: opacidade,
       transform: [{ scale: escala }],
     };
@@ -57,10 +59,24 @@ function ItemVoando({ animacao, onFinalizar }: { animacao: Animacao; onFinalizar
 
   return (
     <Animated.View style={estilo}>
-      <Ionicons name="cart" size={26} color="#B30000" />
+      <Image
+        source={animacao.imagem ?? IMAGEM_PADRAO}
+        style={styles.imagem}
+        resizeMode="cover"
+      />
     </Animated.View>
   );
 }
+
+const styles = StyleSheet.create({
+  imagem: {
+    width: TAMANHO_IMAGEM,
+    height: TAMANHO_IMAGEM,
+    borderRadius: TAMANHO_IMAGEM / 2,
+    borderWidth: 2,
+    borderColor: '#ffffff',
+  },
+});
 
 export function CarrinhoAnimacaoOverlay() {
   const { animacoes, removerAnimacao } = useCarrinho();

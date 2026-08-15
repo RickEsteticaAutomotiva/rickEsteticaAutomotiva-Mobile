@@ -14,7 +14,7 @@ import { useAuth } from './AuthContext';
  *   imagem?: string,
  * }} ItemCarrinho
  * @typedef {{ x: number, y: number }} Posicao
- * @typedef {{ id: number, origem: Posicao, destino: Posicao }} AnimacaoCarrinho
+ * @typedef {{ id: number, origem: Posicao, destino: Posicao, imagem?: import('react-native').ImageSourcePropType }} AnimacaoCarrinho
  * @typedef {{
  *   itens: ItemCarrinho[],
  *   loading: boolean,
@@ -27,7 +27,7 @@ import { useAuth } from './AuthContext';
  *   removerItem: (idCarrinho: number|string) => Promise<void>,
  *   animacoes: AnimacaoCarrinho[],
  *   registrarPosicaoCarrinho: (posicao: Posicao) => void,
- *   dispararAnimacaoCarrinho: (origem: Posicao) => void,
+ *   dispararAnimacaoCarrinho: (origem: Posicao, imagem?: import('react-native').ImageSourcePropType) => void,
  *   removerAnimacao: (id: number) => void,
  * }} CarrinhoContextValue
  */
@@ -100,12 +100,12 @@ export function CarrinhoProvider({ children }) {
         posicaoCarrinhoRef.current = posicao;
     }, []);
 
-    const dispararAnimacaoCarrinho = useCallback((origem) => {
+    const dispararAnimacaoCarrinho = useCallback((origem, imagem) => {
         const { width, height } = Dimensions.get('window');
         const destino = posicaoCarrinhoRef.current || { x: width - 40, y: height - 40 };
         const id = Date.now() + Math.random();
 
-        setAnimacoes((atual) => [...atual, { id, origem, destino }]);
+        setAnimacoes((atual) => [...atual, { id, origem, destino, imagem }]);
     }, []);
 
     const removerAnimacao = useCallback((id) => {

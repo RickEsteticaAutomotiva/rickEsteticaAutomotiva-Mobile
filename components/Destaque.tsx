@@ -1,9 +1,9 @@
 import React, { useRef, useState } from 'react';
 import {
-  Dimensions,
-  FlatList,
-  Text,
-  View,
+    Dimensions,
+    FlatList,
+    Text,
+    View,
 } from 'react-native';
 
 const { width } = Dimensions.get('window');
@@ -62,7 +62,7 @@ export function Destaque() {
               width: width - 40
               ,
             }}
-            className={`mr-0 h-[213px] overflow-hidden rounded-xl ${item.cor} shadow-md`}
+            className={`mr-0 h-[213px] overflow-hidden rounded-xl ${item.cor} shadow`}
           >
             <View className="flex-1 items-center justify-center">
               <Text className="text-4xl font-bold text-white">

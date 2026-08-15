@@ -28,7 +28,7 @@ export function ConfirmModal({
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
       <View className="flex-1 items-center justify-center bg-black/50 px-6">
-        <View className="w-full rounded-lg bg-white p-5 shadow-md">
+        <View className="w-full rounded-lg bg-white p-5 shadow">
           <Text className="text-xl font-bold text-gray-900">{title}</Text>
 
           <Text className="mt-2 text-base text-gray-600">{message}</Text>

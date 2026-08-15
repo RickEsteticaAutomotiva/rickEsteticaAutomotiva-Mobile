@@ -1,16 +1,15 @@
+import { Ionicons } from '@expo/vector-icons';
+import { router, useFocusEffect } from 'expo-router';
 import React, { useCallback, useState } from 'react';
 import { ActivityIndicator, Image, Pressable, ScrollView, Text, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useFocusEffect } from 'expo-router';
 import { Alerta } from '../../components/Alerta';
 import { CarrinhoBottom } from '../../components/CarrinhoBottom';
 import { EstadoCarregamento } from '../../components/EstadoCarregamento';
 import { EstadoErro } from '../../components/EstadoErro';
+import { getImagemServico } from '../../constants/imagensServicos';
 import { useCarrinho } from '../../context/CarrinhoContext';
-import { formatarPreco } from '../../utils';
-import { IMAGEM_PLACEHOLDER } from '../../constants/imagens';
 import type { ItemCarrinho } from '../../types';
-import { router } from 'expo-router';
+import { formatarPreco } from '../../utils';
 
 export default function Carrinho() {
   const { itens, loading, erro, carregarCarrinho, removerItem } = useCarrinho();
@@ -82,7 +81,7 @@ export default function Carrinho() {
             return (
               <View
                 key={String(item.idCarrinho)}
-                className="flex-row justify-between w-full mb-3 p-3 rounded-lg bg-white shadow-md"
+                className="flex-row justify-between w-full mb-3 p-3 rounded-lg bg-white shadow"
               >
                 <Pressable
                   id={`servico-card-${item.idServico}`}
@@ -97,7 +96,7 @@ export default function Carrinho() {
                 >
                   <View className="items-center bg-gray-100 rounded-lg h-[80px] w-[80px]">
                     <Image
-                      source={{ uri: item.imagem || IMAGEM_PLACEHOLDER }}
+                      source={getImagemServico(item.nome)}
                       className="w-full h-full rounded-lg"
                       resizeMode="cover"
                     />

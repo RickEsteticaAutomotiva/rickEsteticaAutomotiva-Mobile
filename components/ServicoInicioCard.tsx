@@ -9,7 +9,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { formatarPreco } from '../utils';
-import { IMAGEM_PLACEHOLDER } from '../constants/imagens';
+import { getImagemServico } from '../constants/imagensServicos';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
 import { useCarrinho } from '../context/CarrinhoContext';
@@ -84,7 +84,7 @@ export function ServicoInicioCard({
 
       await adicionarServico(servicoId);
       setAdicionado(true);
-      dispararAnimacaoCarrinho(origem);
+      dispararAnimacaoCarrinho(origem, getImagemServico(nome));
 
       timeoutRef.current = setTimeout(() => setAdicionado(false), 1500);
     } catch {
@@ -109,7 +109,7 @@ export function ServicoInicioCard({
     >
       <View className="h-[150px] w-full overflow-hidden rounded-t-lg bg-gray-100">
         <Image
-          source={{ uri: imagem || IMAGEM_PLACEHOLDER }}
+          source={getImagemServico(nome)}
           className="h-full w-full"
           resizeMode="cover"
         />

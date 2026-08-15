@@ -1,18 +1,18 @@
-import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { router, useLocalSearchParams } from 'expo-router';
 import { Alerta } from '@/components/Alerta';
 import { Button } from '@/components/Button';
 import { EstadoCarregamento } from '@/components/EstadoCarregamento';
 import { EstadoErro } from '@/components/EstadoErro';
+import { Ionicons } from '@expo/vector-icons';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { useCarrinho } from '../context/CarrinhoContext';
-import { veiculoService } from '../services/VeiculoService';
 import { ordemServicoService } from '../services/OrdemServicoService';
+import { veiculoService } from '../services/VeiculoService';
+import type { HorarioDisponivel, ItemCarrinho, Veiculo } from '../types';
+import { formatarDataCompleta, formatarPreco } from '../utils';
 import { normalizarVeiculos } from '../utils/normalizacao';
-import { formatarPreco, formatarDataCompleta } from '../utils';
-import type { Veiculo, HorarioDisponivel, ItemCarrinho } from '../types';
 
 const DIAS_SEMANA = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
@@ -269,7 +269,7 @@ export default function Agendamento() {
   return (
     <ScrollView className="flex-1" style={{ backgroundColor: '#f7f7f7' }} contentContainerStyle={{ padding: 12, paddingBottom: 32 }}>
 
-      <View className="bg-white p-4 rounded-lg shadow-md border border-gray-200 mb-4">
+      <View className="bg-white p-4 rounded-lg shadow border border-gray-200 mb-4">
         <Text className="text-xl font-bold text-gray-900">Escolha a data e horário</Text>
         <Text className="mt-1 text-base text-gray-600">
           Selecione quando deseja receber o serviço
@@ -388,7 +388,7 @@ export default function Agendamento() {
         ) : null}
       </View>
 
-      <View className="bg-white p-4 rounded-lg shadow-md border border-gray-200">
+      <View className="bg-white p-4 rounded-lg shadow border border-gray-200">
         <Text className="text-xl font-bold text-gray-900 mb-3">Resumo do agendamento</Text>
 
         <View className="flex-row items-center rounded-lg bg-gray-100 p-3">

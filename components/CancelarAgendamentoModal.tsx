@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Modal, Pressable, Text, View } from 'react-native';
+import { MotivosCancelamento } from '../utils/enum/MotivosCancelamento';
 import { Alerta } from './Alerta';
 import { Button } from './Button';
 import { Input } from './Input';
-import { MotivosCancelamento } from '../utils/enum/MotivosCancelamento';
 
 const OPCOES_MOTIVO = Object.values(MotivosCancelamento) as { id: number; key: string; label: string }[];
 const ID_OUTROS = MotivosCancelamento.OUTROS.id;
@@ -59,7 +59,7 @@ export function CancelarAgendamentoModal({
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <View className="flex-1 items-center justify-center bg-black/50 px-6">
-        <View className="w-full rounded-lg bg-white p-5 shadow-md">
+        <View className="w-full rounded-lg bg-white p-5 shadow">
           <Text className="text-xl font-bold text-gray-900">Cancelar agendamento</Text>
 
           <Text className="mt-2 text-base text-gray-600">

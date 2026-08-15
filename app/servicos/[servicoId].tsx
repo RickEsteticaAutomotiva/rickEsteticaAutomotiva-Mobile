@@ -18,7 +18,7 @@ import { Button } from '../../components/Button';
 import { EstadoCarregamento } from '../../components/EstadoCarregamento';
 import { EstadoErro } from '../../components/EstadoErro';
 import { formatarPreco } from '../../utils';
-import { IMAGEM_PLACEHOLDER } from '../../constants/imagens';
+import { getImagemServico } from '../../constants/imagensServicos';
 import { useAuth } from '../../context/AuthContext';
 import { useCarrinho } from '../../context/CarrinhoContext';
 import { useFavoritos } from '../../context/FavoritosContext';
@@ -137,10 +137,6 @@ export default function Servico() {
     ? formatarPreco(servico.preco as number | string)
     : null;
 
-  const imagem = String(
-    servico?.imagem || ''
-  );
-
   const favoritado = servico?.id !== undefined && isFavorito(servico.id as string | number);
 
   async function handleCompartilhar() {
@@ -182,9 +178,7 @@ export default function Servico() {
     <ScrollView className="flex-1 bg-white">
         <View className="relative h-[350px] w-full overflow-hidden bg-gray-100 mb-4">
             <Image
-                source={{
-                uri: imagem || IMAGEM_PLACEHOLDER,
-                }}
+                source={getImagemServico(nome)}
                 className="h-full w-full"
                 resizeMode="cover"
             />

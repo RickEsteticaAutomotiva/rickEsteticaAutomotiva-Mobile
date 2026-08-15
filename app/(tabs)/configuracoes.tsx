@@ -102,7 +102,7 @@ export default function Configuracoes() {
             <View className="my-4 mx-2">
                 {erro ? <Alerta mensagem={erro} /> : null}
 
-                <View className="bg-white rounded-lg p-2 shadow-md mb-4">
+                <View className="bg-white rounded-lg p-2 shadow mb-4">
                     <ConfiguracaoItem
                         icone="person-outline"
                         titulo="Editar perfil"
@@ -118,7 +118,7 @@ export default function Configuracoes() {
                     />
                 </View>
 
-                <View className="bg-white rounded-lg p-2 shadow-md">
+                <View className="bg-white rounded-lg p-2 shadow">
                     <ConfiguracaoItem
                         icone="heart-outline"
                         titulo="Serviços favoritos"

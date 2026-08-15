@@ -1,7 +1,3 @@
-import { ScrollView, Text, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import { useState } from 'react';
 import { Alerta } from '@/components/Alerta';
 import { Button } from '@/components/Button';
 import { ConfirmModal } from '@/components/ConfirmModal';
@@ -9,6 +5,10 @@ import { EstadoCarregamento } from '@/components/EstadoCarregamento';
 import { VeiculoCard } from '@/components/VeiculoCard';
 import { VeiculoFormModal } from '@/components/VeiculoFormModal';
 import { useVeiculos } from '@/hooks/useVeiculos';
+import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
+import { useState } from 'react';
+import { ScrollView, Text, View } from 'react-native';
 
 export default function VeiculoScreen() {
   const [veiculoSelecionadoId, setVeiculoSelecionadoId] = useState<string | number | null>(null);
@@ -106,7 +106,7 @@ export default function VeiculoScreen() {
           </ScrollView>
         </View>
 
-        <View className="w-full px-4 py-4 mt-4 absolute bottom-0 bg-white rounded-t-lg shadow-md">
+        <View className="w-full px-4 py-4 mt-4 absolute bottom-0 bg-white rounded-t-lg shadow">
 
             <Button
               texto="Avançar"

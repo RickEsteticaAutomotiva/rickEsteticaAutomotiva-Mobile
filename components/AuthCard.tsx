@@ -21,7 +21,7 @@ export function AuthCard({
   onFooterPress,
 }: AuthCardProps) {
   return (
-    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: '#f7f7f7' }}>
+    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: '#B30000' }}>
       <ScrollView
         className="flex-1"
         style={{ backgroundColor: '#FFFFFF' }}
