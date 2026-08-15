@@ -25,6 +25,7 @@ export class CarrinhoService {
     async removerItemCarrinho(idCarrinho) {
         try {
             const response = await apiService.delete(`${this.BASE_URL}/${idCarrinho}`);
+            return response;
         } catch (error) {
             throw new Error(error.message || 'Erro ao remover item do carrinho');
         }

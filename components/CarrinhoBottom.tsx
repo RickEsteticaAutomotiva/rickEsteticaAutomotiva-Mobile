@@ -1,36 +1,32 @@
-import { Pressable, Text, Image, View } from 'react-native';
+import { router } from 'expo-router';
+import { Text, View } from 'react-native';
+import { useCarrinho } from '../context/CarrinhoContext';
+import { formatarPreco } from '../utils';
+import { Button } from './Button';
 
-type CarrinhoBottomProps = {
+export function CarrinhoBottom() {
+  const { quantidadeItens, total } = useCarrinho();
 
-};
-
-export function CarrinhoBottom({
-  
-}: CarrinhoBottomProps) {
   return (
-    <View className="flex-row flex-wrap justify-between bg-white p-4 rounded-t-xl shadow-md w-full">
-        <Text className="text-xl font-semibold text-gray-900 mb-3">
-            Resumo do pedido
-        </Text>
-
-        <View className="flex-row justify-between w-full border-t border-gray-200 pt-3">
-            <Text className="text-base font-semibold text-gray-900">
+    <View className="flex-row flex-wrap justify-between bg-white p-4 rounded-t-xl shadow w-full">
+        <View className="flex-row justify-between w-full pt-3">
+            <Text className="text-base font-semibold text-gray-700">
                 Valor mínimo:
             </Text>
             <Text className="text-base font-semibold text-gray-900">
-                R$ 0,00
+                {formatarPreco(total)}
             </Text>
         </View>
 
-        <Pressable
-            onPress={() => {}}
-            className="mt-3 mb-8 rounded-lg py-2 px-4 w-full items-center"
-            style={{ backgroundColor: '#B30000' }}
-        >
-            <Text className="text-base font-semibold text-white">
-                Agendar serviço
-            </Text>
-        </Pressable>
+        <Button
+            texto="Agendar Serviço"
+            onClick={() => {router.push({
+                      pathname: '/veiculo'
+                      })}}
+            className="mt-5 mb-4 bg-red-700 w-full"
+            textClassName="text-white"
+            disabled={quantidadeItens === 0}
+        />
     </View>
   );
 }

@@ -1,49 +1,63 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
-import { ROUTES } from '../constants/Routes';
+import { apiService } from '../services/ApiService';
 import { authService } from '../services/AuthService';
 
+/**
+ * @typedef {{ id: number|string, email?: string, nome?: string, roles?: string[] }} Usuario
+ * @typedef {{
+ *   user: Usuario | null,
+ *   loading: boolean,
+ *   isAuthenticated: boolean,
+ *   login: (email: string, senha: string) => Promise<any>,
+ *   cadastrar: (dadosCadastro: any) => Promise<any>,
+ *   logout: () => Promise<void>,
+ *   updateUser: (novosDados: Partial<Usuario>) => Promise<void>,
+ *   hasRole: (role: string) => boolean,
+ *   getToken: () => Promise<string | null>,
+ *   checkAuthStatus: () => Promise<void>,
+ * }} AuthContextValue
+ */
+
+/** @type {import('react').Context<AuthContextValue | null>} */
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-    const [user, setUser] = useState(null);
+    const [user, setUser] = useState(/** @type {Usuario | null} */ (null));
     const [loading, setLoading] = useState(true);
-    // const router = useRouter();
 
-    const logout = useCallback(() => {
-        authService.clearAuthData();
+    const logout = useCallback(async () => {
+        await authService.clearAuthData();
         setUser(null);
-        navigate(ROUTES.HOME, { replace: true });
-    }, [navigate]);
-
-    // Escuta eventos de sessão expirada disparados pelo ApiService interceptor
-    useEffect(() => {
-        const handleUnauthorized = () => {
-            authService.clearAuthData();
-            setUser(null);
-            navigate(ROUTES.LOGIN, { replace: true });
-        };
-        window.addEventListener('auth:unauthorized', handleUnauthorized);
-        return () => window.removeEventListener('auth:unauthorized', handleUnauthorized);
-    }, [navigate]);
-
-    useEffect(() => {
-        checkAuthStatus();
-
+        router.replace('/login');
     }, []);
 
-    const checkAuthStatus = async () => {
+    // O ApiService avisa aqui quando uma requisição autenticada recebe 401
+    // (token expirado/inválido), centralizando a limpeza de sessão em um único
+    // lugar em vez de duplicar esse tratamento em cada tela.
+    useEffect(() => {
+        apiService.setOnUnauthorized(() => {
+            setUser(null);
+            router.replace('/login');
+        });
+
+        return () => apiService.setOnUnauthorized(null);
+    }, []);
+
+    const checkAuthStatus = useCallback(async () => {
         setLoading(true);
         try {
             const token = await AsyncStorage.getItem('token');
             const userData = await AsyncStorage.getItem('userData');
 
             if (!token || !userData) {
+                setUser(null);
                 return;
             }
 
             if (authService.isTokenExpired(token)) {
-                authService.clearAuthData();
+                await authService.clearAuthData();
                 setUser(null);
                 return;
             }
@@ -52,61 +66,87 @@ export function AuthProvider({ children }) {
             setUser(verifiedUser);
         } catch (error) {
             console.error('Erro na verificação de autenticação:', error.message);
-            authService.clearAuthData();
+            await authService.clearAuthData();
             setUser(null);
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
-    const login = async (email, senha) => {
+    useEffect(() => {
+        checkAuthStatus();
+    }, [checkAuthStatus]);
+
+    const login = useCallback(async (email, senha) => {
         const response = await authService.login(email, senha);
 
         await AsyncStorage.multiSet([
             ['token', response.token],
-            ['userData', JSON.stringify(response.user)]
+            ['userData', JSON.stringify(response.user)],
         ]);
 
         setUser(response.user);
 
         return response;
-    }
-
-    const updateUser = async (newUserData) => {
-        const updatedUser = { ...user, ...newUserData };
-        await AsyncStorage.setItem('userData', JSON.stringify(updatedUser));
-        setUser(updatedUser);
-    };
-
-    const hasRole = useCallback((role) => {
-        return user?.roles?.includes(role) ?? false;
-    }, [user]);
-
-    const isAuthenticated = useCallback(async () => {
-        const token = await AsyncStorage.getItem('token');
-
-        if (!token) return false;
-
-        if (authService.isTokenExpired(token)) {
-            return false;
-        }
-
-        return true;
     }, []);
 
-    const getToken = async () => {
+    const cadastrar = useCallback(async (dadosCadastro) => {
+        const response = await authService.cadastrar(dadosCadastro);
+
+        // O backend atual não autentica automaticamente após o cadastro (não
+        // retorna token). Só persistimos sessão aqui se um token vier na resposta.
+        if (response.token) {
+            await AsyncStorage.multiSet([
+                ['token', response.token],
+                ['userData', JSON.stringify(response.user)],
+            ]);
+            setUser(response.user);
+        }
+
+        return response;
+    }, []);
+
+    const updateUser = useCallback(async (novosDados) => {
+        setUser((atual) => {
+            const usuarioAtualizado = { ...atual, ...novosDados };
+            AsyncStorage.setItem('userData', JSON.stringify(usuarioAtualizado));
+            return usuarioAtualizado;
+        });
+    }, []);
+
+    const hasRole = useCallback(
+        (role) => user?.roles?.includes(role) ?? false,
+        [user]
+    );
+
+    const getToken = useCallback(async () => {
         const token = await AsyncStorage.getItem('token');
 
         if (token && authService.isTokenExpired(token)) {
-            logout();
+            await logout();
             return null;
         }
 
         return token;
-    };
+    }, [logout]);
+
+    const isAuthenticated = !!user;
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, logout, updateUser, isAuthenticated, hasRole, getToken, checkAuthStatus }}>
+        <AuthContext.Provider
+            value={{
+                user,
+                loading,
+                isAuthenticated,
+                login,
+                cadastrar,
+                logout,
+                updateUser,
+                hasRole,
+                getToken,
+                checkAuthStatus,
+            }}
+        >
             {children}
         </AuthContext.Provider>
     );

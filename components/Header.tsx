@@ -1,27 +1,34 @@
 import { Pressable, Text, Image, View, ScrollView } from 'react-native';
-
-type CategoriaHeader = {
-  id: string | number;
-  nome: string;
-};
+import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
+import { CategoriaChip } from './CategoriaChip';
+import type { Categoria } from '../types';
 
 type HeaderProps = {
-  categorias: CategoriaHeader[];
-  categoriaSelecionadaId: string | number | null;
-  onSelecionarCategoria: (categoriaId: string | number | null) => void;
+  categorias?: Categoria[];
+  categoriaSelecionadaId?: string | number | null;
+  onSelecionarCategoria?: (categoriaId: string | number | null) => void;
+  mostrarCategorias?: boolean;
+  mostrarVoltar?: boolean;
+  valorPesquisa?: string;
+  onPressPesquisa?: () => void;
 };
 
 export function Header({
-  categorias,
-  categoriaSelecionadaId,
-  onSelecionarCategoria,
+  categorias = [],
+  categoriaSelecionadaId = null,
+  onSelecionarCategoria = () => {},
+  mostrarCategorias = true,
+  mostrarVoltar = false,
+  valorPesquisa = '',
+  onPressPesquisa,
 }: HeaderProps) {
   return (
-    <View className="flex direction-col justify-between bg-white p-4 pb-0 rounded-t-xl shadow-md w-full" style={{ backgroundColor: '#B30000' }}>
+    <View className="flex direction-col justify-between bg-white p-4 pb-0 shadow-b-md w-full" style={{ backgroundColor: '#B30000' }}>
         {/* Logo */}
         <View className="w-full flex items-center mb-4">
             <Image
-                source={require('../../assets/rick_logo.png')}
+                source={require('../assets/rick_logo.png')}
                 className="w-12 h-12"
                 resizeMode="contain"
             />
@@ -29,91 +36,66 @@ export function Header({
 
         {/* Barra de pesquisa e notificações */}
         <View className="flex-row items-center mb-4">
+            {mostrarVoltar ? (
+                <Pressable
+                    onPress={() => router.back()}
+                    hitSlop={8}
+                    className="mr-3 h-9 w-9 items-center justify-center rounded-full"
+                    style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}
+                >
+                    <Ionicons name="arrow-back" size={20} color="#ffffff" />
+                </Pressable>
+            ) : null}
+
             <Pressable
-                onPress={() => {}}
-                className="flex-row mr-4 rounded-lg py-2 px-4 w-5/6 items-start justify-between"
+                onPress={onPressPesquisa ?? (() => router.push('/pesquisa'))}
+                className={`flex-row mr-4 rounded-full py-2 px-3 items-start ${mostrarVoltar ? 'flex-1' : 'w-5/6'}`}
                 style={{ backgroundColor: '#ffffff' }}
             >
-                <Text className="text-base font-semibold text-gray-500">
-                    Buscar serviços
-                </Text>
-
-                <View className="h-full border-l border-gray-300 ml-2 pl-2">
-                    <Text className="px-2 text-base font-semibold text-gray-500">
-                        B
-                    </Text>
+                <View className="h-full pl-2 mr-2">
+                  <Ionicons name="search-outline" size={20} color="#696b6e"/>
                 </View>
+
+                <Text
+                    className={`flex-1 text-base ${valorPesquisa ? 'text-gray-900' : 'text-gray-500'}`}
+                    numberOfLines={1}
+                >
+                    {valorPesquisa || 'Buscar serviços'}
+                </Text>
             </Pressable>
 
+          {!mostrarVoltar && (
             <Pressable
                 onPress={() => {}}
                 className="rounded-lg py-2 px-4 w-1/6 items-center justify-center"
             >
-                <Text className="text-base font-semibold text-white">
-                    N
-                </Text>
+                <Ionicons name="notifications-outline" size={24} color="#ffffff" />
             </Pressable>
+          )}
         </View>
 
         {/* Scroll horizontal que exibe a lista de categorias */}
-        {categorias.length > 0 && (
+        {mostrarCategorias && categorias.length > 0 && (
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
             className=""
             contentContainerStyle={{ paddingRight: 8 }}
           >
-          <Pressable
+          <CategoriaChip
+            label="Todas"
+            selecionada={categoriaSelecionadaId === null}
             onPress={() => onSelecionarCategoria(null)}
-            className="mr-2 px-4 pt-2"
-          >
-            <Text
-              className="mb-2"
-              style={{ fontWeight: categoriaSelecionadaId === null ? 'bold' : 'normal',
-                color: categoriaSelecionadaId === null ? '#FFFFFF' : '#000000'
-               }}
-            >
-              Todas
-            </Text>
+          />
 
-            <View 
-                className="rounded-t-full h-2 w-full bg-white"
-                style={{
-                display:
-                    categoriaSelecionadaId === null ? 'flex' : 'none',
-                }}
-            >
-            </View>
-          </Pressable>
-
-          {categorias.map((categoria) => {
-            const selecionada = categoriaSelecionadaId === categoria.id;
-
-            return (
-              <Pressable
-                key={String(categoria.id)}
-                onPress={() => onSelecionarCategoria(categoria.id)}
-                className="mr-2 px-4 pt-2"
-              >
-                <Text
-                  className="mb-2"
-                  style={{ 
-                    fontWeight: selecionada ? 'bold' : 'normal',
-                    color: selecionada ? '#FFFFFF' : '#000000' }}
-                >
-                  {categoria.nome}
-                </Text>
-
-                <View 
-                    className="rounded-t-full h-2 w-full bg-white"
-                    style={{
-                    display: selecionada ? 'flex' : 'none',
-                    }}
-                >
-                </View>
-              </Pressable>
-            );
-          })}
+          {categorias.map((categoria) => (
+            <CategoriaChip
+              key={String(categoria.id)}
+              label={categoria.nome}
+              selecionada={categoriaSelecionadaId === categoria.id}
+              onPress={() => onSelecionarCategoria(categoria.id)}
+            />
+          ))}
         </ScrollView>
       )}
     </View>
