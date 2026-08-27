@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 import { jwtDecode } from 'jwt-decode';
 
-export const API_BASE_URL = 'http://192.168.1.9:8080/api/';
+export const API_BASE_URL = 'http://192.168.1.2:8080/api/';
 
 function extrairMensagemErro(data, statusPadrao) {
     if (!data) {

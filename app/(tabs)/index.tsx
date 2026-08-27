@@ -2,10 +2,11 @@ import { Destaque } from '@/components/Destaque';
 import { EstadoCarregamento } from '@/components/EstadoCarregamento';
 import { Header } from '@/components/Header';
 import { ServicoInicioCard } from "@/components/ServicoInicioCard";
+import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { RefreshControl, ScrollView, Text, View } from "react-native";
+import { Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { categoriaService } from "../../services/CategoriaService";
 import { servicosService } from "../../services/ServicosService";
 import { normalizarCategorias, normalizarServicos } from "../../utils/normalizacao";
@@ -115,6 +116,20 @@ export default function Home() {
           showsVerticalScrollIndicator={false}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         >
+          <Pressable
+            onPress={() => router.push('/assistente')}
+            className="mx-5 mt-4 flex-row items-center bg-white rounded-xl shadow p-4 active:opacity-80"
+          >
+            <View className="w-11 h-11 rounded-full items-center justify-center mr-3" style={{ backgroundColor: '#B30000' }}>
+              <Ionicons name="sparkles" size={22} color="#FFFFFF" />
+            </View>
+            <View className="flex-1">
+              <Text className="text-base font-bold text-gray-900">Assistente IA</Text>
+              <Text className="text-sm text-gray-500">Agende conversando com o assistente</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+          </Pressable>
+
           <Destaque />
 
           <View className="w-full bg-white px-5 mt-5 rounded-tl-3xl rounded-tr-3xl pt-5 pb-5">

@@ -25,6 +25,7 @@ const ROTAS_PROTEGIDAS = [
   '/historico',
   '/editar-perfil',
   '/favoritos',
+  '/assistente',
 ];
 
 function useProtecaoDeRotas(isAuthenticated: boolean, loading: boolean) {
@@ -90,6 +91,23 @@ function RootLayoutNav() {
           title: 'Veiculo',
           headerShown: true,
           headerTitle: 'Veiculo',
+          headerTitleAlign: 'center',
+          headerStyle: {
+            backgroundColor: '#B30000',
+          },
+          headerTitleStyle: {
+            color: '#FFFFFF',
+            fontSize: 18,
+            fontWeight: 'bold',
+          },
+        }}
+        />
+        <Stack.Screen
+          name="assistente"
+          options={{
+          title: 'Assistente Rick',
+          headerShown: true,
+          headerTitle: 'Assistente Rick',
           headerTitleAlign: 'center',
           headerStyle: {
             backgroundColor: '#B30000',
