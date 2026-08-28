@@ -84,5 +84,7 @@ export class DashboardService {
             throw new Error(error.message || 'Erro ao buscar resumo da home');
         }
     }
-    
+
 }
+
+export const dashboardService = new DashboardService();

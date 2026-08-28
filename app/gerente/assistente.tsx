@@ -7,8 +7,8 @@ import { AssistantMessage } from '@/components/AssistantMessage';
 import { AssistantTypingIndicator } from '@/components/AssistantTypingIndicator';
 import { Input } from '@/components/Input';
 import { UserMessage } from '@/components/UserMessage';
-import { useAssistente } from '../hooks/useAssistente';
-import { useVoiceInput } from '../hooks/useVoiceInput';
+import { useAssistente } from '../../hooks/useAssistente';
+import { useVoiceInput } from '../../hooks/useVoiceInput';
 
 export default function Assistente() {
   const {

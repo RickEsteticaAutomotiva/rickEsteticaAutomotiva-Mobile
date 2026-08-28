@@ -2,6 +2,7 @@ import { Stack, usePathname, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import 'react-native-reanimated';
 import '../global.css';
 import { AuthProvider, useAuth } from '../context/AuthContext';
@@ -25,10 +26,10 @@ const ROTAS_PROTEGIDAS = [
   '/historico',
   '/editar-perfil',
   '/favoritos',
-  '/assistente',
+  '/gerente',
 ];
 
-function useProtecaoDeRotas(isAuthenticated: boolean, loading: boolean) {
+function useProtecaoDeRotas(isAuthenticated: boolean, isGerente: boolean, loading: boolean) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -41,19 +42,27 @@ function useProtecaoDeRotas(isAuthenticated: boolean, loading: boolean) {
     const emRotaProtegida = ROTAS_PROTEGIDAS.some(
       (rota) => pathname === rota || pathname.startsWith(`${rota}/`)
     );
+    const emRotaGerente = pathname === '/gerente' || pathname.startsWith('/gerente/');
 
     if (!isAuthenticated && emRotaProtegida) {
       router.replace('/login');
     } else if (isAuthenticated && emRotaPublica) {
+      router.replace(isGerente ? '/gerente' : '/');
+    } else if (isAuthenticated && isGerente && !emRotaGerente) {
+      // Gerente fica restrito à própria área — mesma regra da versão web
+      // (AppRoutes.jsx), inclusive ao abrir o app já logado.
+      router.replace('/gerente');
+    } else if (isAuthenticated && !isGerente && emRotaGerente) {
       router.replace('/');
     }
-  }, [isAuthenticated, loading, pathname, router]);
+  }, [isAuthenticated, isGerente, loading, pathname, router]);
 }
 
 function RootLayoutNav() {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, hasRole, loading } = useAuth();
+  const isGerente = hasRole('ROLE_GERENTE');
 
-  useProtecaoDeRotas(isAuthenticated, loading);
+  useProtecaoDeRotas(isAuthenticated, isGerente, loading);
 
   if (loading) {
     return (
@@ -67,6 +76,7 @@ function RootLayoutNav() {
     <>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="gerente" options={{ headerShown: false }} />
         <Stack.Screen
           name="servicos/[servicoId]"
           options={{
@@ -91,23 +101,6 @@ function RootLayoutNav() {
           title: 'Veiculo',
           headerShown: true,
           headerTitle: 'Veiculo',
-          headerTitleAlign: 'center',
-          headerStyle: {
-            backgroundColor: '#B30000',
-          },
-          headerTitleStyle: {
-            color: '#FFFFFF',
-            fontSize: 18,
-            fontWeight: 'bold',
-          },
-        }}
-        />
-        <Stack.Screen
-          name="assistente"
-          options={{
-          title: 'Assistente Rick',
-          headerShown: true,
-          headerTitle: 'Assistente Rick',
           headerTitleAlign: 'center',
           headerStyle: {
             backgroundColor: '#B30000',
@@ -230,12 +223,14 @@ function RootLayoutNav() {
 
 export default function RootLayout() {
   return (
-    <AuthProvider>
-      <CarrinhoProvider>
-        <FavoritosProvider>
-          <RootLayoutNav />
-        </FavoritosProvider>
-      </CarrinhoProvider>
-    </AuthProvider>
+    <SafeAreaProvider>
+      <AuthProvider>
+        <CarrinhoProvider>
+          <FavoritosProvider>
+            <RootLayoutNav />
+          </FavoritosProvider>
+        </CarrinhoProvider>
+      </AuthProvider>
+    </SafeAreaProvider>
   );
 }

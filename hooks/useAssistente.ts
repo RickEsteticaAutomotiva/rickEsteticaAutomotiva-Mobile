@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import * as Speech from 'expo-speech';
-import { useAuth } from '../context/AuthContext';
 import { assistenteService } from '../services/AssistenteService';
 import { servicosService } from '../services/ServicosService';
 import { veiculoService } from '../services/VeiculoService';
@@ -56,19 +55,20 @@ function novoId() {
   return `msg-${Date.now()}-${contadorId}`;
 }
 
-// Estado e orquestração do assistente de agendamento por IA. As tools rodam
-// aqui (client-side), chamando os mesmos services usados pelo restante do
-// app (servicosService, veiculoService, ordemServicoService) — o backend só
-// funciona como proxy autenticado para o modelo de IA (ver AssistenteService).
+// Estado e orquestração do assistente de agendamento por IA, de uso
+// exclusivo do gerente — ele agenda serviços em nome dos clientes, nunca
+// para si mesmo. As tools rodam aqui (client-side), chamando os mesmos
+// services de gestão usados pelo restante da área do gerente (servicosService,
+// veiculoService.buscarTodos, ordemServicoService.criarOrdemServicoGestao) —
+// o backend só funciona como proxy autenticado para o modelo de IA (ver
+// AssistenteService).
 export function useAssistente() {
-  const { user } = useAuth();
-
   const [mensagens, setMensagens] = useState<MensagemUI[]>(() => [
     {
       id: novoId(),
       autor: 'ia',
       texto:
-        'Olá! Sou o assistente da Rick Estética Automotiva. Me conte o que você gostaria de agendar — por exemplo, o serviço e o veículo.',
+        'Olá! Sou o assistente da Rick Estética Automotiva. Me diga qual cliente você quer atender (placa ou modelo do veículo), o serviço e o horário desejado para eu preparar o agendamento.',
       tipo: 'texto',
     },
   ]);
@@ -125,13 +125,12 @@ export function useAssistente() {
             };
           }
 
-          case 'buscarVeiculosUsuario': {
-            if (!user?.id) {
-              return { erro: 'Usuário não autenticado.' };
-            }
-            // user.id vem sempre da sessão autenticada — nunca de um argumento
-            // vindo do modelo, mesmo que ele tente enviar um.
-            const resposta = await veiculoService.buscarVeiculosPorUsuario(user.id);
+          case 'buscarVeiculos': {
+            // Busca de gestão: cobre os veículos de qualquer cliente (por
+            // placa, marca ou modelo) — o gerente agenda para o cliente, não
+            // para si mesmo, então a busca nunca fica restrita a um usuário.
+            const termo = String(argumentos?.termo ?? '');
+            const resposta = await veiculoService.buscarTodos({ filtro: termo, pagina: 0, tamanho: 20 });
             const veiculos = normalizarVeiculos(resposta);
             ultimosVeiculosRef.current = veiculos;
             return {
@@ -194,7 +193,7 @@ export function useAssistente() {
         return { erro: mensagemErro };
       }
     },
-    [user?.id]
+    []
   );
 
   const rodarConversa = useCallback(async () => {
@@ -319,13 +318,13 @@ export function useAssistente() {
         precoMinimo: resumoPendente.precoServico,
       };
 
-      await ordemServicoService.criarOrdemServico(payload);
+      await ordemServicoService.criarOrdemServicoGestao(payload);
 
       adicionarMensagemUI(
         'ia',
         `✅ Agendamento realizado com sucesso!\n\n${resumoPendente.servicoNome} agendado para ${formatarDataSimples(
           resumoPendente.data
-        )} às ${resumoPendente.horario}.\n\nVeículo: ${resumoPendente.veiculoLabel}`
+        )} às ${resumoPendente.horario}.\n\nVeículo do cliente: ${resumoPendente.veiculoLabel}`
       );
       setResumoPendente(null);
     } catch (error) {

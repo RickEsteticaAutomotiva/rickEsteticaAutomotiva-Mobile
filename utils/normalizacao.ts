@@ -24,7 +24,7 @@ const CHAVES_LISTA = [
   'ordens',
 ];
 
-function extrairLista(response: unknown): unknown[] {
+export function extrairLista(response: unknown): unknown[] {
   if (Array.isArray(response)) {
     return response;
   }
@@ -61,6 +61,23 @@ export function normalizarCategorias(response: unknown): Categoria[] {
   return categorias;
 }
 
+// Backend expõe duração como LocalTime serializado ("HH:mm:ss") no campo
+// `duracaoHoras` — convertida aqui para minutos totais, mais fácil de editar
+// num campo numérico simples na tela do gerente.
+function duracaoHorasParaMinutos(duracaoHoras: unknown): number | undefined {
+  if (typeof duracaoHoras !== 'string') {
+    return undefined;
+  }
+
+  const partes = duracaoHoras.split(':').map(Number);
+  if (partes.length < 2 || partes.some(Number.isNaN)) {
+    return undefined;
+  }
+
+  const [horas, minutos] = partes;
+  return horas * 60 + minutos;
+}
+
 export function normalizarServicos(response: unknown): Servico[] {
   const servicos: Servico[] = [];
 
@@ -77,6 +94,8 @@ export function normalizarServicos(response: unknown): Servico[] {
       descricao: String(servico.descricao || servico.description || ''),
       preco: servico.preco as number | string,
       imagem: String(servico.imagem || servico.image || ''),
+      categoriaId: servico.categoriaId as string | number | undefined,
+      duracaoMinutos: duracaoHorasParaMinutos(servico.duracaoHoras),
     });
   });
 
@@ -293,11 +312,24 @@ export function normalizarOrdemServico(item: unknown): OrdemServico | null {
       : servicos.reduce((soma, servico) => soma + (Number(servico.preco) || 0), 0);
 
   const motivoCancelamento = registro.motivoCancelamento ?? registro.motivo;
+  const dataAgendamentoBruta = registro.dataAgendamento ?? registro.dataHora;
+
+  const clienteBruto = registro.cliente as Record<string, unknown> | undefined;
+  const cliente =
+    clienteBruto && clienteBruto.id !== undefined && clienteBruto.id !== null
+      ? {
+          id: clienteBruto.id as string | number,
+          nome: String(clienteBruto.nome || ''),
+          telefone: clienteBruto.telefone ? String(clienteBruto.telefone) : undefined,
+        }
+      : null;
 
   return {
     id,
-    dataAgendamento: registro.dataAgendamento ? String(registro.dataAgendamento) : undefined,
+    dataAgendamento: dataAgendamentoBruta ? String(dataAgendamentoBruta) : undefined,
+    dataConclusao: registro.dataConclusao ? String(registro.dataConclusao) : undefined,
     status: normalizarStatusOrdemServico(registro),
+    cliente,
     veiculo: normalizarVeiculo(registro.veiculo),
     servicos,
     precoTotal,

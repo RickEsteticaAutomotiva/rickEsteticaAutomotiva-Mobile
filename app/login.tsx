@@ -48,8 +48,9 @@ export default function Login() {
     setCarregando(true);
 
     try {
-      await login(email, senha);
-      router.replace('/');
+      const response = await login(email, senha);
+      const isGerente = response?.user?.roles?.includes('ROLE_GERENTE');
+      router.replace(isGerente ? '/gerente' : '/');
     } catch (error) {
       const mensagem = error instanceof Error ? error.message : 'Não foi possível fazer login.';
       setErro(mensagem);
