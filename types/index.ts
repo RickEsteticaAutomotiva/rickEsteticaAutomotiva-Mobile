@@ -10,6 +10,8 @@ export type Servico = {
   descricao: string;
   preco: number | string;
   imagem?: string;
+  categoriaId?: string | number;
+  duracaoMinutos?: number;
 };
 
 export type ItemCarrinho = {
@@ -72,10 +74,18 @@ export type StatusOrdemServico = {
   nome: string;
 };
 
+export type ClienteOrdemServico = {
+  id: string | number;
+  nome: string;
+  telefone?: string;
+};
+
 export type OrdemServico = {
   id: string | number;
   dataAgendamento?: string;
+  dataConclusao?: string;
   status: StatusOrdemServico;
+  cliente: ClienteOrdemServico | null;
   veiculo: Veiculo | null;
   servicos: ItemOrdemServico[];
   precoTotal: number;
