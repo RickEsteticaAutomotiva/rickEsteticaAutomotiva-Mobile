@@ -39,6 +39,13 @@
             "backgroundColor": "#000000"
           }
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Permita o acesso às fotos para selecionar a imagem de um agendamento.",
+          "cameraPermission": "Permita o acesso à câmera para tirar a foto de um agendamento."
+        }
       ]
     ],
     "experiments": {

@@ -28,6 +28,13 @@ export default function MaisGerente() {
       <ScrollView className="flex-1 px-4 pt-4">
         <View className="bg-white rounded-lg p-2 shadow mb-4">
           <ConfiguracaoItem
+            icone="camera-outline"
+            titulo="Importar agendamento"
+            subtitulo="Tire uma foto de uma anotação e crie a OS"
+            onPress={() => router.push('/gerente/importar-agendamento')}
+          />
+
+          <ConfiguracaoItem
             icone="sparkles-outline"
             titulo="Assistente IA"
             subtitulo="Converse com o assistente do Rick"

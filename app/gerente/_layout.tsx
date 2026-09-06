@@ -80,6 +80,11 @@ export default function GerenteTabLayout() {
         name="assistente"
         options={{ href: null, headerTitle: 'Assistente Rick' }}
       />
+
+      <Tabs.Screen
+        name="importar-agendamento"
+        options={{ href: null, headerShown: false }}
+      />
     </Tabs>
   );
 }
