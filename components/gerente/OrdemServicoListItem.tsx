@@ -13,9 +13,16 @@ export function OrdemServicoListItem({ ordem, onPress }: { ordem: OrdemServico; 
         <StatusPill status={ordem.status} />
       </View>
 
-      <Text className="mt-1 text-sm text-gray-600" numberOfLines={1}>
-        {ordem.cliente?.nome || 'Cliente não informado'}
-      </Text>
+      <View className="mt-1 flex-row items-center">
+        <Text className="flex-1 text-sm text-gray-600" numberOfLines={1}>
+          {ordem.cliente?.nome || 'Cliente não informado'}
+        </Text>
+        {ordem.origem === 'IMPORTACAO_IA' ? (
+          <View className="ml-2 rounded-full bg-blue-100 px-2 py-0.5">
+            <Text className="text-[10px] font-semibold text-blue-700">Importado via IA</Text>
+          </View>
+        ) : null}
+      </View>
 
       <View className="mt-1 flex-row items-center justify-between">
         <Text className="text-xs text-gray-500">{formatarDataHorarioCompleto(ordem.dataAgendamento ?? '')}</Text>

@@ -1,12 +1,15 @@
 import { StatusAgendamento } from './enum/statusAgendamento';
 import type {
+  CampoExtraido,
   Categoria,
+  DadosImportacaoAgendamento,
   Favorito,
   FavoritoServico,
   ItemCarrinho,
   ItemOrdemServico,
   OrdemServico,
   Perfil,
+  Pessoa,
   Servico,
   Veiculo,
 } from '../types';
@@ -335,6 +338,7 @@ export function normalizarOrdemServico(item: unknown): OrdemServico | null {
     precoTotal,
     observacoes: registro.observacoes ? String(registro.observacoes) : undefined,
     motivoCancelamento: motivoCancelamento ? String(motivoCancelamento) : undefined,
+    origem: registro.origem ? String(registro.origem) : undefined,
   };
 }
 
@@ -343,4 +347,61 @@ export function normalizarOrdensServico(response: unknown): OrdemServico[] {
     .map(normalizarOrdemServico)
     .filter((ordem): ordem is OrdemServico => ordem !== null)
     .sort((a, b) => Number(b.id) - Number(a.id));
+}
+
+export function normalizarPessoa(item: unknown): Pessoa | null {
+  if (!item || typeof item !== 'object') {
+    return null;
+  }
+
+  const registro = item as Record<string, unknown>;
+  const id = registro.id as string | number | undefined;
+
+  if (id === undefined || id === null) {
+    return null;
+  }
+
+  return {
+    id,
+    nome: String(registro.nome || ''),
+    cpf: registro.cpf ? String(registro.cpf) : undefined,
+    email: registro.email ? String(registro.email) : undefined,
+    telefone: registro.telefone ? String(registro.telefone) : undefined,
+  };
+}
+
+export function normalizarPessoas(response: unknown): Pessoa[] {
+  return extrairLista(response)
+    .map(normalizarPessoa)
+    .filter((pessoa): pessoa is Pessoa => pessoa !== null);
+}
+
+function normalizarCampoExtraido<T>(campo: unknown): CampoExtraido<T> {
+  if (!campo || typeof campo !== 'object') {
+    return { valor: null, confianca: null };
+  }
+  const registro = campo as Record<string, unknown>;
+  return {
+    valor: (registro.valor ?? null) as T | null,
+    confianca: typeof registro.confianca === 'number' ? registro.confianca : null,
+  };
+}
+
+export function normalizarImportacaoAgendamento(response: unknown): DadosImportacaoAgendamento {
+  const registro = (response && typeof response === 'object' ? response : {}) as Record<string, unknown>;
+
+  return {
+    nomeCliente: normalizarCampoExtraido<string>(registro.nomeCliente),
+    telefoneCliente: normalizarCampoExtraido<string>(registro.telefoneCliente),
+    placaVeiculo: normalizarCampoExtraido<string>(registro.placaVeiculo),
+    modeloVeiculo: normalizarCampoExtraido<string>(registro.modeloVeiculo),
+    descricaoServico: normalizarCampoExtraido<string>(registro.descricaoServico),
+    data: normalizarCampoExtraido<string>(registro.data),
+    horario: normalizarCampoExtraido<string>(registro.horario),
+    valor: normalizarCampoExtraido<number>(registro.valor),
+    observacoesLivres: registro.observacoesLivres ? String(registro.observacoesLivres) : undefined,
+    candidatosPessoa: normalizarPessoas({ content: registro.candidatosPessoa }),
+    candidatosVeiculo: normalizarVeiculos({ content: registro.candidatosVeiculo }),
+    candidatosServico: normalizarServicos({ content: registro.candidatosServico }),
+  };
 }

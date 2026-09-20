@@ -91,4 +91,33 @@ export type OrdemServico = {
   precoTotal: number;
   observacoes?: string;
   motivoCancelamento?: string;
+  origem?: string;
+};
+
+export type Pessoa = {
+  id: string | number;
+  nome: string;
+  cpf?: string;
+  email?: string;
+  telefone?: string;
+};
+
+export type CampoExtraido<T> = {
+  valor: T | null;
+  confianca: number | null;
+};
+
+export type DadosImportacaoAgendamento = {
+  nomeCliente: CampoExtraido<string>;
+  telefoneCliente: CampoExtraido<string>;
+  placaVeiculo: CampoExtraido<string>;
+  modeloVeiculo: CampoExtraido<string>;
+  descricaoServico: CampoExtraido<string>;
+  data: CampoExtraido<string>;
+  horario: CampoExtraido<string>;
+  valor: CampoExtraido<number>;
+  observacoesLivres?: string;
+  candidatosPessoa: Pessoa[];
+  candidatosVeiculo: Veiculo[];
+  candidatosServico: Servico[];
 };

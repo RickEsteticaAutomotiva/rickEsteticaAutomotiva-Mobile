@@ -134,7 +134,8 @@ export class OrdemServicoService {
             ...(veiculo !== undefined && veiculo !== null ? { veiculo: Number(veiculo) } : {}),
             servicos: servicosNormalizados,
             ...(ordemData?.precoMinimo !== undefined ? { precoMinimo: ordemData.precoMinimo } : {}),
-            ...(ordemData?.observacoes ? { observacoes: ordemData.observacoes } : {})
+            ...(ordemData?.observacoes ? { observacoes: ordemData.observacoes } : {}),
+            ...(ordemData?.origem ? { origem: ordemData.origem } : {})
         };
 
         try {
