@@ -7,7 +7,6 @@
     "icon": "./assets/images/icon.png",
     "scheme": "rickesteticaautomotivamobile",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true
     },
@@ -18,7 +17,6 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
     "web": {
@@ -46,7 +44,11 @@
           "photosPermission": "Permita o acesso às fotos para selecionar a imagem de um agendamento.",
           "cameraPermission": "Permita o acesso à câmera para tirar a foto de um agendamento."
         }
-      ]
+      ],
+      "expo-font",
+      "expo-image",
+      "expo-status-bar",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
