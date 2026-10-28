@@ -86,7 +86,7 @@ export function CarrinhoAnimacaoOverlay() {
   }
 
   return (
-    <View pointerEvents="none" style={StyleSheet.absoluteFillObject}>
+    <View pointerEvents="none" style={StyleSheet.absoluteFill}>
       {animacoes.map((animacao) => (
         <ItemVoando
           key={animacao.id}

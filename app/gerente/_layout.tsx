@@ -1,6 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 
+// No SDK 58, href: null bloqueia a tela e redireciona para a primeira aba.
+// Ocultamos apenas o botao para manter a navegacao programatica disponivel.
+const TELA_SEM_BOTAO = {
+  tabBarButton: () => null,
+  tabBarItemStyle: { display: 'none' as const },
+};
+
 export default function GerenteTabLayout() {
   return (
     <Tabs
@@ -63,27 +70,27 @@ export default function GerenteTabLayout() {
 
       <Tabs.Screen
         name="servicos"
-        options={{ href: null, headerTitle: 'Gerenciar serviços' }}
+        options={{ ...TELA_SEM_BOTAO, headerTitle: 'Gerenciar serviços' }}
       />
 
       <Tabs.Screen
         name="categorias"
-        options={{ href: null, headerTitle: 'Gerenciar categorias' }}
+        options={{ ...TELA_SEM_BOTAO, headerTitle: 'Gerenciar categorias' }}
       />
 
       <Tabs.Screen
         name="perfil"
-        options={{ href: null, headerTitle: 'Perfil' }}
+        options={{ ...TELA_SEM_BOTAO, headerTitle: 'Perfil' }}
       />
 
       <Tabs.Screen
         name="assistente"
-        options={{ href: null, headerTitle: 'Assistente Rick' }}
+        options={{ ...TELA_SEM_BOTAO, headerTitle: 'Assistente Rick' }}
       />
 
       <Tabs.Screen
         name="importar-agendamento"
-        options={{ href: null, headerShown: false }}
+        options={{ ...TELA_SEM_BOTAO, headerShown: false }}
       />
     </Tabs>
   );

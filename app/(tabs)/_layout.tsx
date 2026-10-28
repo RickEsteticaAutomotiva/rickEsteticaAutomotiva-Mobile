@@ -1,10 +1,10 @@
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Tabs } from 'expo-router';
 import React, { useRef } from 'react';
-import { View } from 'react-native';
+import { View, type ColorValue } from 'react-native';
 import { useCarrinho } from '../../context/CarrinhoContext';
 
-function CarrinhoTabIcon({ color }: { color: string }) {
+function CarrinhoTabIcon({ color }: { color: ColorValue }) {
   const { registrarPosicaoCarrinho } = useCarrinho();
   const ref = useRef<View>(null);
 
@@ -21,6 +21,13 @@ function CarrinhoTabIcon({ color }: { color: string }) {
     </View>
   );
 }
+
+// No SDK 58, href: null bloqueia a tela e redireciona para a primeira aba.
+// Ocultamos apenas o botao para manter a navegacao programatica disponivel.
+const TELA_SEM_BOTAO = {
+  tabBarButton: () => null,
+  tabBarItemStyle: { display: 'none' as const },
+};
 
 export default function TabLayout() {
   const { quantidadeItens } = useCarrinho();
@@ -77,7 +84,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="categoria/[categoriaId]"
         options={{
-          href: null,
+          ...TELA_SEM_BOTAO,
           headerShown: false,
         }}
       />
@@ -85,7 +92,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="pesquisa"
         options={{
-          href: null,
+          ...TELA_SEM_BOTAO,
           headerShown: false,
         }}
       />
@@ -93,7 +100,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="pesquisa/resultados"
         options={{
-          href: null,
+          ...TELA_SEM_BOTAO,
           headerShown: false,
         }}
       />
